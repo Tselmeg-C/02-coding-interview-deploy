@@ -6,7 +6,12 @@ function errorResponse(error, message) {
   return { error, message };
 }
 
-export function createApp(store, { frontendDirectory } = {}) {
+/**
+ * @param {*} store
+ * @param {{ frontendDirectory?: string }} [options]
+ */
+export function createApp(store, options = {}) {
+  const { frontendDirectory } = options;
   const app = express();
   const api = express.Router();
   app.use(cors());
