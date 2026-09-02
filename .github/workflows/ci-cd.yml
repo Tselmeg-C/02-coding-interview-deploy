@@ -54,6 +54,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm ci --prefix backend
+      - run: npm ci --prefix frontend
       - run: npm run typecheck
 
   full-stack:
