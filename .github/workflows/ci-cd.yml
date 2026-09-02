@@ -1,9 +1,9 @@
-name: CI and Railway deployment
+name: CI and development deployment
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [dev]
 
 permissions:
   contents: read
@@ -52,23 +52,23 @@ jobs:
       - if: always()
         run: docker compose down --volumes --remove-orphans
 
-  deploy:
+  deploy-development:
     needs: full-stack
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    environment: helpful-intuition / production
+    environment: development
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate deployment configuration
+      - name: Validate development deployment configuration
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID || secrets.RAILWAY_PROJECT_ID }}
-          RAILWAY_SERVICE: ${{ vars.RAILWAY_SERVICE || secrets.RAILWAY_SERVICE }}
-          RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT || secrets.RAILWAY_ENVIRONMENT }}
-          RAILWAY_PUBLIC_URL: ${{ vars.RAILWAY_PUBLIC_URL || secrets.RAILWAY_PUBLIC_URL }}
+          RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+          RAILWAY_SERVICE: ${{ vars.RAILWAY_SERVICE }}
+          RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT }}
+          RAILWAY_PUBLIC_URL: ${{ vars.RAILWAY_PUBLIC_URL }}
         run: |
           for required_name in RAILWAY_API_TOKEN RAILWAY_PROJECT_ID RAILWAY_SERVICE RAILWAY_ENVIRONMENT RAILWAY_PUBLIC_URL; do
             if [ -z "${!required_name}" ]; then
@@ -79,11 +79,11 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID || secrets.RAILWAY_PROJECT_ID }}
-          RAILWAY_SERVICE: ${{ vars.RAILWAY_SERVICE || secrets.RAILWAY_SERVICE }}
-          RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT || secrets.RAILWAY_ENVIRONMENT }}
+          RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+          RAILWAY_SERVICE: ${{ vars.RAILWAY_SERVICE }}
+          RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT }}
         run: npx --yes @railway/cli up --ci --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT"
       - name: Verify deployed health endpoint
         env:
-          RAILWAY_PUBLIC_URL: ${{ vars.RAILWAY_PUBLIC_URL || secrets.RAILWAY_PUBLIC_URL }}
+          RAILWAY_PUBLIC_URL: ${{ vars.RAILWAY_PUBLIC_URL }}
         run: curl --fail --show-error --retry 12 --retry-delay 5 "$RAILWAY_PUBLIC_URL/health"
