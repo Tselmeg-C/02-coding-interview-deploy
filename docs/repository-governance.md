@@ -31,9 +31,11 @@ environment variables.
 ## Enforced controls
 
 The repository is public and both `main` and `dev` require one approving
-review, the `backend`, `frontend`, and `full-stack` CI contexts, resolved
-conversations, linear history, and no force pushes or deletions. Reviews are
-dismissed when a new commit is pushed.
+review, the `backend`, `frontend`, `lint`, `typecheck`, and `full-stack` CI
+contexts, resolved conversations, linear history, and no force pushes or
+deletions. Repository administrators may bypass the approval requirement while
+the project has a single human reviewer. Reviews are dismissed when a new
+commit is pushed.
 
 An active GitHub ruleset automatically requests Copilot code review for every
 pull request, including drafts and subsequent pushes. Copilot review is an
