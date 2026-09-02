@@ -28,16 +28,16 @@ development and production. `RAILWAY_API_TOKEN` belongs only in the matching
 GitHub environment secret; Railway identifiers and public URL belong in GitHub
 environment variables.
 
-## Current control limitation
+## Enforced controls
 
-GitHub rejected branch-protection configuration for this private repository
-under the current account plan. Before treating this workflow as enforced,
-either enable a GitHub plan that supports private-repository branch protection
-or explicitly make the repository public after a security review. Do not
-weaken the workflow by direct-pushing to `main` or `dev` while this remains
-unresolved.
+The repository is public and both `main` and `dev` require one approving
+review, the `backend`, `frontend`, and `full-stack` CI contexts, resolved
+conversations, linear history, and no force pushes or deletions. Reviews are
+dismissed when a new commit is pushed.
 
-Once the account supports it, require one approving review, the three CI
-contexts above, resolved conversations, linear history, and no force pushes or
-deletions on both `main` and `dev`. Configure production with a reviewer who
-is independent of the deployer; do not use self-approval as a substitute.
+An active GitHub ruleset automatically requests Copilot code review for every
+pull request, including drafts and subsequent pushes. Copilot review is an
+additional signal, not a substitute for an accountable human reviewer.
+
+Configure production with a reviewer who is independent of the deployer; do
+not use self-approval as a substitute.
