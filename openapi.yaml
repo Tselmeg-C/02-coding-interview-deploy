@@ -1,0 +1,159 @@
+openapi: 3.1.0
+info:
+  title: PairCode Interview API
+  version: 0.1.0
+  description: |
+    HTTP API for creating and reading online coding-interview rooms.
+    Real-time room synchronization is defined separately in
+    docs/realtime-protocol.md and is provided through Socket.IO.
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+paths:
+  /api/rooms:
+    post:
+      operationId: createRoom
+      summary: Create an interview room
+      responses:
+        '201':
+          description: The created room
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/rooms/{roomId}:
+    parameters:
+      - $ref: '#/components/parameters/RoomId'
+    get:
+      operationId: getRoom
+      summary: Get the current state of an interview room
+      responses:
+        '200':
+          description: The room's current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          $ref: '#/components/responses/RoomNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      operationId: updateRoom
+      summary: Update the current code or language of an interview room
+      description: |
+        This endpoint supports non-real-time clients and administrative tools.
+        Interactive clients synchronize edits through the Socket.IO events in
+        docs/realtime-protocol.md.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomUpdate'
+      responses:
+        '200':
+          description: The room after the update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/RoomNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  parameters:
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      description: Unique identifier assigned when the room is created.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+  schemas:
+    Language:
+      type: string
+      enum:
+        - javascript
+        - python
+    Room:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - language
+        - code
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Unique room identifier.
+          examples:
+            - 7f3a9d2b
+        language:
+          $ref: '#/components/schemas/Language'
+        code:
+          type: string
+          description: The full shared source document.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp of the latest accepted room update.
+    RoomUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        language:
+          $ref: '#/components/schemas/Language'
+        code:
+          type: string
+          description: The full replacement source document.
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          examples:
+            - room_not_found
+        message:
+          type: string
+  responses:
+    RoomNotFound:
+      description: No room exists for the supplied identifier.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: room_not_found
+            message: This interview room does not exist.
+    ValidationError:
+      description: The request body does not satisfy the contract.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: validation_error
+            message: Provide at least one supported room field.
+    InternalServerError:
+      description: An unexpected server error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: internal_error
+            message: An unexpected error occurred.

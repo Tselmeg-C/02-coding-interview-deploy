@@ -1,0 +1,17 @@
+{
+  "name": "coding-interview",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "test": "npm run test --prefix backend && npm run test --prefix frontend",
+    "compose:up": "docker compose up --build --wait",
+    "compose:down": "docker compose down --volumes --remove-orphans",
+    "test:integration": "node integration/compose-smoke.mjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "concurrently": "^9.2.1"
+  }
+}
