@@ -12,8 +12,8 @@ This document implements the repository-controls portion of
 | `type/issue-number-summary` | Short-lived implementation branch from `dev` | None directly |
 
 Feature PRs target `dev`. A release PR targets `main`. Required CI contexts
-are `backend`, `frontend`, and `full-stack`; changes to deployment behaviour
-also require the documented local release gate.
+are `backend`, `frontend`, `lint`, `typecheck`, and `full-stack`; changes to
+deployment behaviour also require the documented local release gate.
 
 ## Environments
 

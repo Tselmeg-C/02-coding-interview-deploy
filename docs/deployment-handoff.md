@@ -27,6 +27,19 @@ Updated: September 2, 2026.
 
 No secret or token value is stored in this repository or this handoff.
 
+## Railway environment split status
+
+- The Railway project has distinct `development` and `production`
+  environments. GitHub's `production` environment is restricted to protected
+  branches and requires the demo project's owner approval.
+- Development has a running app service, its own running managed PostgreSQL
+  service, a public domain, and `DEPLOYMENT_ENVIRONMENT=development`.
+- Production currently has no running app or PostgreSQL service instance and
+  no public domain. It must not be pointed at the development database.
+- On September 2, 2026, Railway rejected creation of a new production
+  PostgreSQL service because the project's free-plan resource provision limit
+  was reached. No production resource was created or changed by that attempt.
+
 ## Required GitHub environment configuration
 
 Use GitHub repository Settings → Environments → `development`.
@@ -46,13 +59,21 @@ Required GitHub environment variables:
 
 ## Next-session work
 
-The development deployment workflow is in place. Future work can include:
+The development deployment workflow is in place. Resume the environment split
+as follows:
 
-1. Configure and verify a separate production workflow when production CD is
-   required.
-2. Add observability, alerting, and a documented incident response process.
-3. Consider preview/staging environments before production for larger changes.
-4. Keep the existing CI, health, and two-browser checks required for changes
+1. Resolve Railway capacity by upgrading the project or, only after an
+   inventory and approved recovery plan, removing unused resources. Do not
+   reuse the development Postgres service for production.
+2. Provision isolated production app and managed PostgreSQL services; set the
+   app's `DATABASE_URL` from its production PostgreSQL service and
+   `DEPLOYMENT_ENVIRONMENT=production`.
+3. Configure the production GitHub environment's secret and non-secret
+   deployment identifiers, then add the approval-gated production promotion
+   workflow. Keep values out of source control and command output.
+4. Verify `/health`, room creation, persistence, and two independent browser
+   sessions synchronizing an edit in each environment.
+5. Keep the existing CI, health, and two-browser checks required for changes
    to the application or deployment stack.
-5. Do not print, commit, or request secret values. Use
+6. Do not print, commit, or request secret values. Use
    `env -u GITHUB_TOKEN` for GitHub CLI and Git push operations.
