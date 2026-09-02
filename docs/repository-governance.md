@@ -12,8 +12,8 @@ This document implements the repository-controls portion of
 | `type/issue-number-summary` | Short-lived implementation branch from `dev` | None directly |
 
 Feature PRs target `dev`. A release PR targets `main`. Required CI contexts
-are `backend`, `frontend`, `lint`, `typecheck`, and `full-stack`; changes to
-deployment behaviour also require the documented local release gate.
+are `backend`, `frontend`, and `full-stack`; changes to deployment behaviour
+also require the documented local release gate.
 
 ## Environments
 
@@ -31,9 +31,8 @@ environment variables.
 ## Enforced controls
 
 The repository is public and both `main` and `dev` require one approving
-review, the `backend`, `frontend`, `lint`, `typecheck`, and `full-stack` CI
-contexts, resolved conversations, linear history, and no force pushes or
-deletions. These protections apply to administrators as well. Reviews are
+review, the `backend`, `frontend`, and `full-stack` CI contexts, resolved
+conversations, linear history, and no force pushes or deletions. Reviews are
 dismissed when a new commit is pushed.
 
 An active GitHub ruleset automatically requests Copilot code review for every
