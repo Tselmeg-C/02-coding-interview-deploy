@@ -130,6 +130,18 @@ After a successful Railway deployment, use the service's generated public
 domain to open the application and verify that two browser sessions can join
 the same room and synchronize edits.
 
+## Telemetry
+
+The backend initializes OpenTelemetry before loading Express, Socket.IO, or
+the database client. Automatic instrumentation covers HTTP and PostgreSQL;
+manual spans and bounded counters cover room join/update events. Set
+`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and the three
+`OTEL_*_EXPORTER=otlp` settings in each Railway environment. Set
+`DEPLOYMENT_ENVIRONMENT` to `development` or `production` and
+`SERVICE_VERSION` to the deployed image tag or digest. The application does
+not emit room IDs, participant IDs, source code, credentials, connection
+strings, or raw URLs to telemetry.
+
 ## CI/CD configuration
 
 `.github/workflows/ci-cd.yml` runs backend and frontend checks in parallel,

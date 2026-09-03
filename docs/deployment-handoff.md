@@ -72,6 +72,12 @@ digest verification:
 - `DEV_RAILWAY_SERVICE`
 - `DEV_RAILWAY_ENVIRONMENT`
 
+Telemetry configuration belongs in each Railway environment: set
+`OTEL_EXPORTER_OTLP_ENDPOINT`, keep `OTEL_EXPORTER_OTLP_HEADERS` in a secret,
+enable `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`, and
+`OTEL_LOGS_EXPORTER` with `otlp`, and set `DEPLOYMENT_ENVIRONMENT` plus
+`SERVICE_VERSION`.
+
 ## Immutable release workflow
 
 `.github/workflows/production-release.yml` accepts a timestamped release tag or
