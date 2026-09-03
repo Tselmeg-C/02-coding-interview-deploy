@@ -135,10 +135,13 @@ the same room and synchronize edits.
 `.github/workflows/ci-cd.yml` runs backend and frontend checks in parallel,
 then runs lint and type checks, builds Docker Compose, runs the Postgres
 integration smoke test, and runs the two-session Playwright test. A push to
-`dev` deploys to Railway development only after those checks pass. A push to
-`main` deploys to Railway production after the same checks and approval through
-the protected GitHub `production` environment. Both deployments verify
-`/health` afterwards. Pull requests run the checks but do not deploy.
+`dev` builds and publishes one immutable GHCR image tagged with its UTC
+timestamp and short commit SHA, then deploys that image digest to Railway
+development only after those checks pass. A push to `main` deploys to Railway
+production after the same checks and approval through the protected GitHub
+`production` environment; production remains source-deployed until the
+promotion workflow in Issue #4. Both deployments verify `/health` afterwards.
+Pull requests run the checks but do not deploy.
 
 Configure these values in the GitHub environment named `development`:
 
