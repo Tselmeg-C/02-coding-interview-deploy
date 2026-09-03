@@ -13,7 +13,7 @@ function once(socket, event) {
   return new Promise((resolve) => socket.once(event, resolve));
 }
 
-test('broadcasts a room update to every client in the room', async (context) => {
+test('broadcasts a room update only to other clients in the room', async (context) => {
   const database = createDatabase({ DATABASE_URL: 'sqlite::memory:' });
   await migrateDatabase(database);
   const store = new RoomRepository(database);
@@ -44,11 +44,15 @@ test('broadcasts a room update to every client in the room', async (context) => 
   await Promise.all([interviewerState, candidateState]);
 
   const interviewerUpdate = once(interviewer, 'room:updated');
-  const candidateUpdate = once(candidate, 'room:updated');
+  let echoedToCandidate = false;
+  candidate.once('room:updated', () => {
+    echoedToCandidate = true;
+  });
   candidate.emit('room:update', { roomId: room.id, code: 'print("shared")', language: 'python' });
 
-  const [fromInterviewer, fromCandidate] = await Promise.all([interviewerUpdate, candidateUpdate]);
+  const fromInterviewer = await interviewerUpdate;
+  await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(fromInterviewer.code, 'print("shared")');
-  assert.equal(fromCandidate.code, 'print("shared")');
   assert.equal(fromInterviewer.language, 'python');
+  assert.equal(echoedToCandidate, false);
 });

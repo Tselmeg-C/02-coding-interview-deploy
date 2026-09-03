@@ -57,6 +57,7 @@ function RoomPage() {
   useEffect(() => () => executor.current.dispose(), []);
 
   function applyChange(patch) {
+    setRoom((currentRoom) => currentRoom ? { ...currentRoom, ...patch } : currentRoom);
     connection.current?.update(patch);
   }
 

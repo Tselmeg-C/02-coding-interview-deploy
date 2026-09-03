@@ -35,6 +35,19 @@ changes, a release is promoted, or an operational check fails.
 12. Re-ran the complete push workflow after repairing branch ancestry. Workflow
     run `33728961404` passed all five quality gates, deployed development, and
     passed its post-deploy health check.
+13. Merged PR #26 to put this deployment record on `dev`. The final development
+    push run `33729365093` passed all gates, deployed development, and passed
+    health verification.
+14. Admin-merged release PR #25 into `main` as `5a998e4` after its required
+    checks passed on `dev`.
+15. Production workflow run `33729586837` passed its backend, frontend, lint,
+    type-check, Compose startup, and HTTP integration steps, but the two-browser
+    check failed before deployment. The interviewer received
+    `console.log("shared from candid")` instead of the candidate's complete
+    edit. Production deployment was skipped.
+16. The sender-echo repair passed backend and frontend tests, lint, type-check,
+    the Compose/PostgreSQL integration check, and 10 consecutive runs of the
+    two-browser Playwright scenario before commit.
 
 ### Commits and pull requests
 
@@ -44,6 +57,19 @@ changes, a release is promoted, or an operational check fails.
 - `c282f65` — merged `main` ancestry into `dev` without changing the verified
   tree, resolving conflicts caused by earlier independent squash merges.
 - PR #25 — promotes the verified `dev` state to `main`.
+- PR #26 — added this deployment history to `dev` as `af5795a`.
+
+### Failed-gate diagnosis
+
+- The failed two-browser check exposed a sender echo race rather than a
+  production infrastructure failure. The server broadcast every incremental
+  editor update back to the sender, while the sender's controlled React editor
+  relied on those asynchronous echoes for state. A stale echo could overwrite
+  newer local keystrokes.
+- The repair updates local React room state optimistically and broadcasts a
+  saved room update only to the other sockets in the room, matching the product
+  requirement. Backend regression coverage asserts that the sender receives no
+  echo; the two-browser E2E remains the end-to-end regression gate.
 
 ### Deliberate exceptions
 
