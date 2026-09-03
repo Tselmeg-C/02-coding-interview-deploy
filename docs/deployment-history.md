@@ -117,19 +117,6 @@ changes, a release is promoted, or an operational check fails.
   lint, backend and frontend tests, Compose/PostgreSQL integration check, and
   two-browser Playwright check all passed before the issue #32 commit.
 
-### Immutable release workflow
-
-- Issue #3 publishes a timestamped GHCR image from the validated `dev` build,
-  records its digest, and deploys that digest to development.
-- Issue #4 adds `.github/workflows/production-release.yml`. A manual `promote`
-  or `rollback` action accepts a release tag or digest, verifies the digest is
-  running in development, waits for the protected `production` environment,
-  and connects production to the exact digest without rebuilding.
-- The workflow stores the release reference, image, digest, workflow commit,
-  and deployment time as a GitHub artifact. It requires
-  `DEV_RAILWAY_PROJECT_ID`, `DEV_RAILWAY_SERVICE`, and
-  `DEV_RAILWAY_ENVIRONMENT` for the development preflight.
-
 ### Rollback and diagnosis
 
 - Start with the failing GitHub run and identify whether the failure occurred
