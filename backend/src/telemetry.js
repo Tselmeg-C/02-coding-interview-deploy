@@ -4,6 +4,13 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 
+if (process.env.OTEL_EXPORTER_OTLP_HEADERS) {
+  process.env.OTEL_EXPORTER_OTLP_HEADERS = process.env.OTEL_EXPORTER_OTLP_HEADERS.replace(
+    /^Authorization=Basic%20 /,
+    'Authorization=Basic%20',
+  );
+}
+
 const resource = resourceFromAttributes({
   'service.name': 'paircode-interview',
   'deployment.environment.name': process.env.DEPLOYMENT_ENVIRONMENT ?? 'development',

@@ -142,6 +142,11 @@ manual spans and bounded counters cover room join/update events. Set
 not emit room IDs, participant IDs, source code, credentials, connection
 strings, or raw URLs to telemetry.
 
+For local runs, copy `.env.example` to `.env` and fill in the OTLP endpoint and
+header. The backend loads that file automatically, and Docker Compose passes it
+to the app container. Restart the backend or recreate the Compose stack after
+changing telemetry variables.
+
 ## CI/CD configuration
 
 `.github/workflows/ci-cd.yml` runs backend and frontend checks in parallel,
