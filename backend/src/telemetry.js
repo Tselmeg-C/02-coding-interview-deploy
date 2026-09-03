@@ -20,6 +20,16 @@ sdk.start();
 export const tracer = trace.getTracer('paircode-interview');
 export const meter = metrics.getMeter('paircode-interview');
 export const logger = logs.getLogger('paircode-interview');
+export const roomsCreated = meter.createCounter('paircode.rooms.created', {
+  description: 'Interview rooms created',
+});
+export const activeParticipants = meter.createUpDownCounter('paircode.participants.active', {
+  description: 'Participants currently joined to rooms',
+});
+export const roomUpdateDuration = meter.createHistogram('paircode.room.update.duration', {
+  description: 'Time spent processing room updates in milliseconds',
+  unit: 'ms',
+});
 
 export function emitLog(severityText, body, attributes = {}) {
   logger.emit({ severityText, body, attributes });
