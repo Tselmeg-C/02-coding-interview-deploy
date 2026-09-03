@@ -1,4 +1,13 @@
 import { isRoomUpdate } from './rooms/roomRepository.js';
+import { activeParticipants, meter, roomUpdateDuration, tracer } from './telemetry.js';
+
+const roomEvents = meter.createCounter('paircode.room.events', {
+  description: 'Room join and update events processed by Socket.IO',
+});
+
+function recordException(span, error) {
+  span.recordException(error instanceof Error ? error : new Error(String(error)));
+}
 
 function roomError(socket, error, message) {
   socket.emit('room:error', { error, message });
@@ -6,34 +15,69 @@ function roomError(socket, error, message) {
 
 export function attachRealtimeHandlers(io, store) {
   io.on('connection', (socket) => {
-    socket.on('room:join', async (payload) => {
-      const roomId = payload?.roomId;
-      const room = typeof roomId === 'string' ? await store.get(roomId) : null;
-      if (!room) {
-        roomError(socket, 'room_not_found', 'This interview room does not exist.');
-        return;
-      }
-      socket.join(room.id);
-      socket.emit('room:state', room);
+    let joined = false;
+    socket.on('disconnect', () => {
+      if (joined) activeParticipants.add(-1);
     });
 
-    socket.on('room:update', async (payload) => {
-      const roomId = payload?.roomId;
-      const patch = payload && typeof payload === 'object'
-        ? { code: payload.code, language: payload.language }
-        : null;
-      if (patch && patch.code === undefined) delete patch.code;
-      if (patch && patch.language === undefined) delete patch.language;
-      if (typeof roomId !== 'string' || !isRoomUpdate(patch)) {
-        roomError(socket, 'validation_error', 'Provide a room ID and at least one supported room field.');
-        return;
+    socket.on('room:join', (payload) => tracer.startActiveSpan('room.join', async (span) => {
+      try {
+        const roomId = payload?.roomId;
+        const room = typeof roomId === 'string' ? await store.get(roomId) : null;
+        if (!room) {
+          roomEvents.add(1, { operation: 'join', result: 'not_found' });
+          roomError(socket, 'room_not_found', 'This interview room does not exist.');
+          return;
+        }
+        socket.join(room.id);
+        socket.emit('room:state', room);
+        if (!joined) {
+          joined = true;
+          activeParticipants.add(1);
+        }
+        roomEvents.add(1, { operation: 'join', result: 'success' });
+      } catch (error) {
+        recordException(span, error);
+        span.setStatus({ code: 2 });
+        roomEvents.add(1, { operation: 'join', result: 'error' });
+        throw error;
+      } finally {
+        span.end();
       }
-      const room = await store.update(roomId, patch);
-      if (!room) {
-        roomError(socket, 'room_not_found', 'This interview room does not exist.');
-        return;
+    }));
+
+    socket.on('room:update', (payload) => tracer.startActiveSpan('room.update', async (span) => {
+      const startedAt = performance.now();
+      try {
+        const roomId = payload?.roomId;
+        const patch = payload && typeof payload === 'object'
+          ? { code: payload.code, language: payload.language }
+          : null;
+        if (patch && patch.code === undefined) delete patch.code;
+        if (patch && patch.language === undefined) delete patch.language;
+        if (typeof roomId !== 'string' || !isRoomUpdate(patch)) {
+          roomEvents.add(1, { operation: 'update', result: 'validation_error' });
+          roomError(socket, 'validation_error', 'Provide a room ID and at least one supported room field.');
+          return;
+        }
+        const room = await store.update(roomId, patch);
+        if (!room) {
+          roomEvents.add(1, { operation: 'update', result: 'not_found' });
+          roomError(socket, 'room_not_found', 'This interview room does not exist.');
+          return;
+        }
+        socket.to(room.id).emit('room:updated', room);
+        roomUpdateDuration.record(performance.now() - startedAt, { result: 'success' });
+        roomEvents.add(1, { operation: 'update', result: 'success' });
+      } catch (error) {
+        recordException(span, error);
+        span.setStatus({ code: 2 });
+        roomEvents.add(1, { operation: 'update', result: 'error' });
+        roomUpdateDuration.record(performance.now() - startedAt, { result: 'error' });
+        throw error;
+      } finally {
+        span.end();
       }
-      socket.to(room.id).emit('room:updated', room);
-    });
+    }));
   });
 }

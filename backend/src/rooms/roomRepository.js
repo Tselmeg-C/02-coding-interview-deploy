@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { roomsCreated } from '../telemetry.js';
 
 const templates = {
   javascript: 'function solve(input) {\n  // Write your solution here.\n  return input;\n}\n\nconsole.log(solve("Hello, interview!"));\n',
@@ -37,6 +38,7 @@ export class RoomRepository {
       code: room.code,
       updated_at: room.updatedAt,
     });
+    roomsCreated.add(1);
     return room;
   }
 

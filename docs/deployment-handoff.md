@@ -64,10 +64,36 @@ Required GitHub environment variables:
 - `RAILWAY_ENVIRONMENT`: Railway development environment name.
 - `RAILWAY_PUBLIC_URL`: public application base URL without a trailing slash.
 
+The manual production release workflow also requires these repository or
+production-environment variables to identify the development service used for
+digest verification:
+
+- `DEV_RAILWAY_PROJECT_ID`
+- `DEV_RAILWAY_SERVICE`
+- `DEV_RAILWAY_ENVIRONMENT`
+
+Telemetry configuration belongs in each Railway environment: set
+`OTEL_EXPORTER_OTLP_ENDPOINT`, keep `OTEL_EXPORTER_OTLP_HEADERS` in a secret,
+enable `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`, and
+`OTEL_LOGS_EXPORTER` with `otlp`, and set `DEPLOYMENT_ENVIRONMENT` plus
+`SERVICE_VERSION`. The provider setup, retention, access, and verification
+checklist are documented in [`observability.md`](observability.md). Grafana
+Cloud account and Railway secret configuration remain operator actions.
+
+## Immutable release workflow
+
+`.github/workflows/production-release.yml` accepts a timestamped release tag or
+full `sha256:` digest. It resolves tags to digests, verifies the requested
+digest in development, requires the protected `production` environment gate,
+and connects production to that exact image. Select `promote` for a release or
+`rollback` for a previously recorded known-good digest. It never builds an
+image.
+
 ## Next-session work
 
-The production environment split and approval-gated workflow are in place.
-Future work can include:
+The production environment split, immutable development deployment, and
+approval-gated promotion/rollback workflow are in place. Future work can
+include:
 
 1. Add observability, alerting, and a documented incident response process.
 2. Consider preview/staging environments before production for larger changes.

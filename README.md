@@ -130,15 +130,38 @@ After a successful Railway deployment, use the service's generated public
 domain to open the application and verify that two browser sessions can join
 the same room and synchronize edits.
 
+## Telemetry
+
+The backend initializes OpenTelemetry before loading Express, Socket.IO, or
+the database client. Automatic instrumentation covers HTTP and PostgreSQL;
+manual spans and bounded counters cover room join/update events. Set
+`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and the three
+`OTEL_*_EXPORTER=otlp` settings in each Railway environment. Set
+`DEPLOYMENT_ENVIRONMENT` to `development` or `production` and
+`SERVICE_VERSION` to the deployed image tag or digest. The application does
+not emit room IDs, participant IDs, source code, credentials, connection
+strings, or raw URLs to telemetry.
+
+For local runs, copy `.env.example` to `.env` and fill in the OTLP endpoint and
+header. The backend loads that file automatically, and Docker Compose passes it
+to the app container. Restart the backend or recreate the Compose stack after
+changing telemetry variables.
+
 ## CI/CD configuration
 
 `.github/workflows/ci-cd.yml` runs backend and frontend checks in parallel,
 then runs lint and type checks, builds Docker Compose, runs the Postgres
 integration smoke test, and runs the two-session Playwright test. A push to
-`dev` deploys to Railway development only after those checks pass. A push to
-`main` deploys to Railway production after the same checks and approval through
-the protected GitHub `production` environment. Both deployments verify
-`/health` afterwards. Pull requests run the checks but do not deploy.
+`dev` builds and publishes one immutable GHCR image tagged with its UTC
+timestamp and short commit SHA, then deploys that image digest to Railway
+development only after those checks pass. A push to `main` deploys to Railway
+production after the same checks and approval through the protected GitHub
+`production` environment; production remains source-deployed until the
+promotion workflow in Issue #4. The manual production workflow accepts a
+release tag or digest, verifies that development is running that digest, waits
+for the protected `production` environment approval, and promotes or rolls
+back the same image without rebuilding. Both deployments verify `/health` afterwards.
+Pull requests run the checks but do not deploy.
 
 Configure these values in the GitHub environment named `development`:
 

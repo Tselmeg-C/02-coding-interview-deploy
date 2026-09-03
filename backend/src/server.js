@@ -1,3 +1,4 @@
+import { emitLog, shutdownTelemetry } from './telemetry.js';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -25,12 +26,14 @@ const io = new Server(server, {
 attachRealtimeHandlers(io, store);
 
 server.listen(port, () => {
+  emitLog('INFO', 'PairCode backend listening', { port });
   console.log('PairCode backend listening on port ' + port);
 });
 
 async function shutdown() {
   await new Promise((resolve) => server.close(resolve));
   await database.destroy();
+  await shutdownTelemetry();
 }
 
 process.once('SIGINT', shutdown);
