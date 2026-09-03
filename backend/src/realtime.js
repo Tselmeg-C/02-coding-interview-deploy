@@ -1,5 +1,5 @@
 import { isRoomUpdate } from './rooms/roomRepository.js';
-import { meter, tracer } from './telemetry.js';
+import { activeParticipants, meter, roomUpdateDuration, tracer } from './telemetry.js';
 
 const roomEvents = meter.createCounter('paircode.room.events', {
   description: 'Room join and update events processed by Socket.IO',
@@ -15,6 +15,11 @@ function roomError(socket, error, message) {
 
 export function attachRealtimeHandlers(io, store) {
   io.on('connection', (socket) => {
+    let joined = false;
+    socket.on('disconnect', () => {
+      if (joined) activeParticipants.add(-1);
+    });
+
     socket.on('room:join', (payload) => tracer.startActiveSpan('room.join', async (span) => {
       try {
         const roomId = payload?.roomId;
@@ -26,6 +31,10 @@ export function attachRealtimeHandlers(io, store) {
         }
         socket.join(room.id);
         socket.emit('room:state', room);
+        if (!joined) {
+          joined = true;
+          activeParticipants.add(1);
+        }
         roomEvents.add(1, { operation: 'join', result: 'success' });
       } catch (error) {
         recordException(span, error);
@@ -38,6 +47,7 @@ export function attachRealtimeHandlers(io, store) {
     }));
 
     socket.on('room:update', (payload) => tracer.startActiveSpan('room.update', async (span) => {
+      const startedAt = performance.now();
       try {
         const roomId = payload?.roomId;
         const patch = payload && typeof payload === 'object'
@@ -57,11 +67,13 @@ export function attachRealtimeHandlers(io, store) {
           return;
         }
         socket.to(room.id).emit('room:updated', room);
+        roomUpdateDuration.record(performance.now() - startedAt, { result: 'success' });
         roomEvents.add(1, { operation: 'update', result: 'success' });
       } catch (error) {
         recordException(span, error);
         span.setStatus({ code: 2 });
         roomEvents.add(1, { operation: 'update', result: 'error' });
+        roomUpdateDuration.record(performance.now() - startedAt, { result: 'error' });
         throw error;
       } finally {
         span.end();

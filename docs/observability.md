@@ -48,6 +48,12 @@ After setting the Railway variables in each environment:
 4. Confirm telemetry contains no room IDs, participant IDs, source code,
    credentials, connection strings, or raw URLs.
 
+Import the version-filterable dashboard from
+[`observability/dashboards/paircode-overview.json`](../observability/dashboards/paircode-overview.json)
+and select the Prometheus data source created by Grafana Cloud. Metric names,
+boundaries, and intentionally deferred product metrics are listed in
+[`metrics.md`](metrics.md).
+
 The provider account, access policy, endpoint, retention choice, and Railway
 secret values are operational state and must be recorded in the team's secure
 handoff system, never committed here.
