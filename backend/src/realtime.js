@@ -33,7 +33,7 @@ export function attachRealtimeHandlers(io, store) {
         roomError(socket, 'room_not_found', 'This interview room does not exist.');
         return;
       }
-      io.to(room.id).emit('room:updated', room);
+      socket.to(room.id).emit('room:updated', room);
     });
   });
 }
