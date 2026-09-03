@@ -15,6 +15,9 @@ services:
 
   app:
     build: .
+    env_file:
+      - path: .env
+        required: false
     environment:
       PORT: 3001
       DB_ENGINE: postgresql
