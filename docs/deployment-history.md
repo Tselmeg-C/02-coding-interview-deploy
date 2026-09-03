@@ -48,6 +48,17 @@ changes, a release is promoted, or an operational check fails.
 16. The sender-echo repair passed backend and frontend tests, lint, type-check,
     the Compose/PostgreSQL integration check, and 10 consecutive runs of the
     two-browser Playwright scenario before commit.
+17. PR #27 merged the repair into `dev`; development run `33730149873` passed
+    all gates, deployment, and health. After the release-history sync, run
+    `33730483139` repeated those checks successfully.
+18. PR #28 merged the repair into `main` as `5fa2105`, retaining `dev` as a
+    parent to avoid another squash-history conflict. Production run
+    `33730733908` passed all quality gates, the recorded demo-owner approval,
+    Railway deployment, and post-deploy health. Final live HTTP integration and
+    two-browser checks also passed.
+19. Issue #29 upgraded the workflow actions to their verified Node.js 24
+    releases. Before commit, backend and frontend tests, lint, type-check,
+    Compose/PostgreSQL integration, and the two-browser check passed locally.
 
 ### Commits and pull requests
 
@@ -83,10 +94,10 @@ changes, a release is promoted, or an operational check fails.
 
 ### Follow-up signal
 
-- GitHub Actions reports that `actions/checkout@v4` and
-  `actions/setup-node@v4` target the deprecated Node.js 20 action runtime and
-  are currently forced onto Node.js 24. This is a warning, not a failed gate;
-  upgrade the actions when stable replacement major versions are available.
+- Issue #29 tracks removal of the Node.js 20 action-runtime warning. Official
+  action metadata was verified before changing the workflow:
+  `actions/checkout@v7.0.1` and `actions/setup-node@v7.0.0` both declare the
+  Node.js 24 runtime.
 
 ### Rollback and diagnosis
 
