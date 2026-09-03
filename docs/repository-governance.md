@@ -12,15 +12,16 @@ This document implements the repository-controls portion of
 | `type/issue-number-summary` | Short-lived implementation branch from `dev` | None directly |
 
 Feature PRs target `dev`. A release PR targets `main`. Required CI contexts
-are `backend`, `frontend`, and `full-stack`; changes to deployment behaviour
-also require the documented local release gate.
+are `backend`, `frontend`, `lint`, `typecheck`, and `full-stack`; changes to
+deployment behaviour also require the documented local release gate.
 
 ## Environments
 
 The GitHub environments `development` and `production` exist in this
 repository. They are configuration scopes only until their Railway app service,
 managed PostgreSQL service, environment-specific variables, and secrets are
-configured.
+configured. The production environment permits deployments only from protected
+branches and requires approval from the project owner.
 
 Production must receive its own `DATABASE_URL` from its Railway PostgreSQL
 service. Never share a database, public URL, or telemetry credential between
@@ -41,5 +42,10 @@ An active GitHub ruleset automatically requests Copilot code review for every
 pull request, including drafts and subsequent pushes. Copilot review is an
 additional signal, not a substitute for an accountable human reviewer.
 
-Configure production with a reviewer who is independent of the deployer; do
-not use self-approval as a substitute.
+## Demo ownership and escalation
+
+This demo has one accountable human: `Tselmeg-C`, who is the project owner,
+sole production approver, and escalation contact. Self-approval and
+administrator bypass are intentional temporary exceptions for this demo. A
+production system must replace them with an independent approver and documented
+on-call escalation path.

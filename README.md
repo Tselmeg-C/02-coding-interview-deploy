@@ -110,7 +110,7 @@ update, and retrieval against that stack. `npm run test:e2e` uses Playwright to
 create a room in one browser session and verify that an edit reaches a second
 session through Socket.IO.
 
-## Railway development deployment
+## Railway deployments
 
 Railway deploys this repository using the root Dockerfile. The container reads
 the platform-provided PORT environment variable and serves the frontend, API,
@@ -120,11 +120,10 @@ Railway's public domain provides the HTTPS/WSS edge normally handled by Caddy
 in a self-managed EC2 deployment, so this Railway deployment does not run a
 second reverse-proxy container.
 
-The development environment must use a Railway PostgreSQL service, not the
-container's default SQLite file. Create a PostgreSQL service in the same
-Railway environment, then
-set the app service's `DATABASE_URL` to the reference supplied by Railway for
-that PostgreSQL service. Railway keeps the database storage persistent and the
+Each Railway environment must use its own Railway PostgreSQL service, not the
+container's default SQLite file or another environment's database. Set each app
+service's `DATABASE_URL` to the reference supplied by the PostgreSQL service in
+that same environment. Railway keeps the database storage persistent and the
 application creates its schema migrations at startup.
 
 After a successful Railway deployment, use the service's generated public
@@ -136,8 +135,10 @@ the same room and synchronize edits.
 `.github/workflows/ci-cd.yml` runs backend and frontend checks in parallel,
 then runs lint and type checks, builds Docker Compose, runs the Postgres
 integration smoke test, and runs the two-session Playwright test. A push to
-`dev` deploys to Railway only after those checks pass and verifies `/health`
-afterwards. Pull requests run the checks but do not deploy.
+`dev` deploys to Railway development only after those checks pass. A push to
+`main` deploys to Railway production after the same checks and approval through
+the protected GitHub `production` environment. Both deployments verify
+`/health` afterwards. Pull requests run the checks but do not deploy.
 
 Configure these values in the GitHub environment named `development`:
 
@@ -151,13 +152,18 @@ by `RAILWAY_ENVIRONMENT`.
   existing app service, development environment, and public base URL
   respectively.
 
+Configure the same secret and variables in the GitHub environment named
+`production`, using the production app service, Railway environment, and public
+URL. Keep that GitHub environment restricted to protected branches and require
+an approving reviewer so a merge to `main` cannot deploy without approval.
+
 No credential values belong in the repository, GitHub variables, command
 output, or documentation. The workflow invokes Railway's CI mode and uses the
 configured service and environment explicitly.
 
 ## Project progress
 
-As of September 2, 2026:
+As of September 3, 2026:
 
 - The local production-like Compose stack, backed by Postgres, has passed its
   HTTP integration smoke test and two-browser collaboration E2E test.
@@ -165,4 +171,7 @@ As of September 2, 2026:
   jobs for the deployment pipeline.
 - Lint and type-check gates are part of the CI dependency chain before the
   full-stack job and development deployment.
-- A production deployment is not configured by this workflow.
+- Railway production has a dedicated app service and managed PostgreSQL
+  service connected through `DATABASE_URL`.
+- The production deployment passed health, room persistence, and two-browser
+  collaboration checks before production automation was enabled.
