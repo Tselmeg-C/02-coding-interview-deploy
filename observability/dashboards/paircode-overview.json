@@ -3,43 +3,47 @@
   "editable": false,
   "panels": [
     {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
       "id": 1,
-      "title": "Rooms created",
+      "title": "Rooms created / second",
       "type": "timeseries",
-      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (paircode_rooms_created_total{deployment_environment_name=~\"${environment:regex}\",service_version=~\"${version:regex}\"})", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(paircode_rooms_created_total{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
     },
     {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
       "id": 2,
       "title": "Active participants",
       "type": "timeseries",
-      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (paircode_participants_active{deployment_environment_name=~\"${environment:regex}\",service_version=~\"${version:regex}\"})", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (paircode_participants_active{deployment_environment_name=~\"$environment\",service_version=~\"$version\"})", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
     },
     {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "id": 3,
       "title": "Room events / second",
       "type": "timeseries",
-      "targets": [{"expr": "sum by (operation, result, deployment_environment_name, service_version) (rate(paircode_room_events_total{deployment_environment_name=~\"${environment:regex}\",service_version=~\"${version:regex}\"}[5m]))", "legendFormat": "{{operation}} {{result}} {{deployment_environment_name}}"}]
+      "targets": [{"expr": "sum by (operation, result, deployment_environment_name, service_version) (rate(paircode_room_events_total{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m]))", "legendFormat": "{{operation}} {{result}} {{deployment_environment_name}}"}]
     },
     {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "id": 4,
       "title": "Room update processing p95",
       "type": "timeseries",
-      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, result, deployment_environment_name, service_version) (rate(paircode_room_update_duration_bucket{deployment_environment_name=~\"${environment:regex}\",service_version=~\"${version:regex}\"}[5m])))", "legendFormat": "{{result}} {{deployment_environment_name}}"}]
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, result, deployment_environment_name, service_version) (rate(paircode_room_update_duration_bucket{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m])))", "legendFormat": "{{result}} {{deployment_environment_name}}"}]
     }
   ],
   "schemaVersion": 39,
   "templating": {
     "list": [
-      {"name": "environment", "type": "query", "query": "label_values(paircode_rooms_created_total, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "development", "value": ["development"]}},
-      {"name": "version", "type": "query", "query": "label_values(paircode_rooms_created_total, service_version)", "includeAll": true, "multi": true, "current": {"text": "local", "value": ["local"]}}
+      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values(paircode_room_events_total, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}},
+      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values(paircode_room_events_total, service_version)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}}
     ]
   },
   "title": "PairCode Interview overview",
