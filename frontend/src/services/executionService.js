@@ -5,7 +5,9 @@ function createWorker() {
 }
 
 export function createExecutionService() {
+  /** @type {Worker | null} */
   let worker = null;
+  /** @type {{ reject: (reason?: unknown) => void } | null} */
   let active = null;
 
   function ensureWorker() {

@@ -4,6 +4,17 @@ import CodeEditor from './components/CodeEditor';
 import { createExecutionService } from './services/executionService';
 import { roomService } from './services/roomService';
 
+/**
+ * @typedef {{
+ *   id: string,
+ *   language: string,
+ *   code: string,
+ *   updatedAt?: string
+ * }} Room
+ */
+
+/** @typedef {{ update: (patch: Partial<Room>) => void, disconnect: () => void }} RoomConnection */
+
 function HomePage() {
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
@@ -36,13 +47,13 @@ function HomePage() {
 
 function RoomPage() {
   const { roomId } = useParams();
-  const [room, setRoom] = useState(null);
+  const [room, setRoom] = useState(/** @type {Room | null} */ (null));
   const [status, setStatus] = useState('connecting');
   const [error, setError] = useState('');
   const [output, setOutput] = useState('Run code to see output here.');
   const [copied, setCopied] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const connection = useRef(null);
+  const connection = useRef(/** @type {RoomConnection | null} */ (null));
   const executor = useRef(createExecutionService());
 
   useEffect(() => {
@@ -56,6 +67,7 @@ function RoomPage() {
 
   useEffect(() => () => executor.current.dispose(), []);
 
+  /** @param {Partial<Room>} patch */
   function applyChange(patch) {
     setRoom((currentRoom) => currentRoom ? { ...currentRoom, ...patch } : currentRoom);
     connection.current?.update(patch);
@@ -73,6 +85,7 @@ function RoomPage() {
   }
 
   async function runCode() {
+    if (!room) return;
     setIsRunning(true);
     setOutput('Starting code runner…');
     try {
@@ -83,7 +96,8 @@ function RoomPage() {
       });
       setOutput(result);
     } catch (executionError) {
-      setOutput('Error: ' + executionError.message);
+      const message = executionError instanceof Error ? executionError.message : 'Code execution failed.';
+      setOutput('Error: ' + message);
     } finally {
       setIsRunning(false);
     }

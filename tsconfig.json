@@ -4,15 +4,17 @@
     "checkJs": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "target": "ES2022",
     "skipLibCheck": true,
     "noImplicitAny": false
   },
   "include": [
     "backend/src/**/*.js",
-    "frontend/src/**/*.{js,jsx}",
+    "frontend/src/**/*.js",
+    "frontend/src/**/*.jsx",
+    "frontend/src/**/*.d.ts",
     "integration/**/*.mjs"
   ],
   "exclude": ["**/node_modules/**", "**/dist/**", "playwright-report/**", "test-results/**"]
