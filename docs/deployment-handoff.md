@@ -2,7 +2,7 @@
 
 ## Current state
 
-Updated: September 2, 2026.
+Updated: September 3, 2026.
 
 - Deployment branch: `dev`.
 - Pull requests run CI only. Pushes to `dev` run CI and, after it passes,
@@ -10,7 +10,8 @@ Updated: September 2, 2026.
 - The CI chain includes backend tests, frontend tests and build, lint,
   type-checking, a Compose/Postgres integration smoke test, and a two-browser
   Playwright collaboration test.
-- Production deployment is not configured in the active workflow.
+- Pushes to `main` run the same release gate and then wait for approval through
+  the protected GitHub `production` environment before deploying.
 
 ## Verified work
 
@@ -34,15 +35,18 @@ No secret or token value is stored in this repository or this handoff.
   branches and requires the demo project's owner approval.
 - Development has a running app service, its own running managed PostgreSQL
   service, a public domain, and `DEPLOYMENT_ENVIRONMENT=development`.
-- Production currently has no running app or PostgreSQL service instance and
-  no public domain. It must not be pointed at the development database.
-- On September 2, 2026, Railway rejected creation of a new production
-  PostgreSQL service because the project's free-plan resource provision limit
-  was reached. No production resource was created or changed by that attempt.
+- Production has a dedicated `app-production` service, its own running managed
+  PostgreSQL service, a public domain, and
+  `DEPLOYMENT_ENVIRONMENT=production`. Its `DATABASE_URL` is a Railway reference
+  to the PostgreSQL service in the production environment.
+- Production passed `/health`, room creation/update/retrieval, room retrieval
+  after an app restart, and the two-browser synchronization check on September
+  3, 2026.
 
 ## Required GitHub environment configuration
 
-Use GitHub repository Settings → Environments → `development`.
+Use GitHub repository Settings → Environments → `development` or
+`production`, with values for the corresponding Railway environment.
 
 Required secret:
 
@@ -59,21 +63,12 @@ Required GitHub environment variables:
 
 ## Next-session work
 
-The development deployment workflow is in place. Resume the environment split
-as follows:
+The production environment split and approval-gated workflow are in place.
+Future work can include:
 
-1. Resolve Railway capacity by upgrading the project or, only after an
-   inventory and approved recovery plan, removing unused resources. Do not
-   reuse the development Postgres service for production.
-2. Provision isolated production app and managed PostgreSQL services; set the
-   app's `DATABASE_URL` from its production PostgreSQL service and
-   `DEPLOYMENT_ENVIRONMENT=production`.
-3. Configure the production GitHub environment's secret and non-secret
-   deployment identifiers, then add the approval-gated production promotion
-   workflow. Keep values out of source control and command output.
-4. Verify `/health`, room creation, persistence, and two independent browser
-   sessions synchronizing an edit in each environment.
-5. Keep the existing CI, health, and two-browser checks required for changes
+1. Add observability, alerting, and a documented incident response process.
+2. Consider preview/staging environments before production for larger changes.
+3. Keep the existing CI, health, and two-browser checks required for changes
    to the application or deployment stack.
-6. Do not print, commit, or request secret values. Use
+4. Do not print, commit, or request secret values. Use
    `env -u GITHUB_TOKEN` for GitHub CLI and Git push operations.
