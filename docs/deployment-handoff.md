@@ -76,7 +76,9 @@ Telemetry configuration belongs in each Railway environment: set
 `OTEL_EXPORTER_OTLP_ENDPOINT`, keep `OTEL_EXPORTER_OTLP_HEADERS` in a secret,
 enable `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`, and
 `OTEL_LOGS_EXPORTER` with `otlp`, and set `DEPLOYMENT_ENVIRONMENT` plus
-`SERVICE_VERSION`.
+`SERVICE_VERSION`. The provider setup, retention, access, and verification
+checklist are documented in [`observability.md`](observability.md). Grafana
+Cloud account and Railway secret configuration remain operator actions.
 
 ## Immutable release workflow
 
