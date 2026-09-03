@@ -2,7 +2,7 @@
 
 ## Current state
 
-Updated: September 2, 2026.
+Updated: September 3, 2026.
 
 - Deployment branch: `dev`.
 - Pull requests run CI only. Pushes to `dev` run CI and, after it passes,
@@ -10,7 +10,8 @@ Updated: September 2, 2026.
 - The CI chain includes backend tests, frontend tests and build, lint,
   type-checking, a Compose/Postgres integration smoke test, and a two-browser
   Playwright collaboration test.
-- Production deployment is not configured in the active workflow.
+- Pushes to `main` run the same release gate and then wait for approval through
+  the protected GitHub `production` environment before deploying.
 
 ## Verified work
 
@@ -27,9 +28,25 @@ Updated: September 2, 2026.
 
 No secret or token value is stored in this repository or this handoff.
 
+## Railway environment split status
+
+- The Railway project has distinct `development` and `production`
+  environments. GitHub's `production` environment is restricted to protected
+  branches and requires the demo project's owner approval.
+- Development has a running app service, its own running managed PostgreSQL
+  service, a public domain, and `DEPLOYMENT_ENVIRONMENT=development`.
+- Production has a dedicated `app-production` service, its own running managed
+  PostgreSQL service, a public domain, and
+  `DEPLOYMENT_ENVIRONMENT=production`. Its `DATABASE_URL` is a Railway reference
+  to the PostgreSQL service in the production environment.
+- Production passed `/health`, room creation/update/retrieval, room retrieval
+  after an app restart, and the two-browser synchronization check on September
+  3, 2026.
+
 ## Required GitHub environment configuration
 
-Use GitHub repository Settings → Environments → `development`.
+Use GitHub repository Settings → Environments → `development` or
+`production`, with values for the corresponding Railway environment.
 
 Required secret:
 
@@ -46,13 +63,12 @@ Required GitHub environment variables:
 
 ## Next-session work
 
-The development deployment workflow is in place. Future work can include:
+The production environment split and approval-gated workflow are in place.
+Future work can include:
 
-1. Configure and verify a separate production workflow when production CD is
-   required.
-2. Add observability, alerting, and a documented incident response process.
-3. Consider preview/staging environments before production for larger changes.
-4. Keep the existing CI, health, and two-browser checks required for changes
+1. Add observability, alerting, and a documented incident response process.
+2. Consider preview/staging environments before production for larger changes.
+3. Keep the existing CI, health, and two-browser checks required for changes
    to the application or deployment stack.
-5. Do not print, commit, or request secret values. Use
+4. Do not print, commit, or request secret values. Use
    `env -u GITHUB_TOKEN` for GitHub CLI and Git push operations.
