@@ -1,5 +1,8 @@
 # Deployment Handoff
 
+See [`deployment-history.md`](deployment-history.md) for the chronological
+record of releases, verification evidence, exceptions, and rollback context.
+
 ## Current state
 
 Updated: September 3, 2026.
