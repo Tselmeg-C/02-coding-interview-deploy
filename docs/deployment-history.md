@@ -99,6 +99,24 @@ changes, a release is promoted, or an operational check fails.
   `actions/checkout@v7.0.1` and `actions/setup-node@v7.0.0` both declare the
   Node.js 24 runtime.
 
+### Review-feedback remediation
+
+- Issue #32 records two valid P2 findings that were present before their pull
+  requests were merged. Administrator review bypass does not waive review
+  findings; each finding must be fixed, rejected with evidence, or placed in a
+  linked follow-up issue before subsequent backlog work starts.
+- The PR #25 finding identified an unsupported TypeScript brace glob. The
+  frontend JavaScript and JSX patterns are now listed separately so the
+  required type-check includes components, services, and workers.
+- The PR #22 finding identified drift between `instruction.md` and the active
+  CI/CD workflow. Phase 1 now documents the implemented `dev` development
+  deployment and approval-gated `main` production deployment, while Phase 2
+  remains responsible for immutable image promotion and rollback.
+- Verification selected eight frontend JavaScript/JSX files spanning the app,
+  tests, components, services, and browser worker. The corrected type-check,
+  lint, backend and frontend tests, Compose/PostgreSQL integration check, and
+  two-browser Playwright check all passed before the issue #32 commit.
+
 ### Rollback and diagnosis
 
 - Start with the failing GitHub run and identify whether the failure occurred

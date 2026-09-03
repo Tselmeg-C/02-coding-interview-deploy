@@ -11,9 +11,10 @@ is updated, and its changes are committed locally.
 - Keep `main` continuously deployable. Pull requests must pass backend,
   frontend, Compose/Postgres integration, and two-browser E2E checks before
   merge.
-- Treat development and production as independent environments. Development
-  receives the newest validated build automatically; production changes only
-  through an approved, manual promotion.
+- Treat development and production as independent environments. A validated
+  push to `dev` deploys development; a validated push to `main` waits for the
+  protected production-environment approval before deploying production.
+  Phase 2 replaces these source deployments with exact-digest promotion.
 - Build once, deploy the resulting immutable image many times. Never rebuild
   source code during promotion.
 - The Railway production application must use the managed PostgreSQL service
@@ -64,19 +65,23 @@ independent browser sessions.
    and telemetry endpoint/credentials.
 4. Change CI/CD semantics:
 
-   - A successful push to `main` builds and deploys to development.
-   - Production has a `workflow_dispatch` workflow that requires the exact
-     immutable image tag or digest to promote.
+   - Pull requests run the complete release gate without deploying.
+   - A successful push to `dev` deploys to development.
+   - A successful push to `main` runs the same gate, waits for approval through
+     the protected GitHub `production` environment, and deploys production.
    - Protect the GitHub production environment with required reviewer
-     approval.
-   - Do not allow the production workflow to silently choose "latest" or
-     rebuild source.
+     approval. The documented single-owner demo exception may satisfy this
+     gate only after every automated check passes.
+   - Treat this as a transitional source-deployment baseline. Issue #3 and
+     Phase 2 replace it with build-once immutable images before exact-digest
+     promotion and rollback are enabled.
 
 5. In each environment, run `/health`, create a room, join it from two
    browsers, and synchronize an edit.
 
-**Exit criterion:** pushing `main` changes development only; a human-approved
-manual action is required to alter production.
+**Exit criterion:** `dev` changes development only; `main` can alter production
+only after the full release gate and an explicitly recorded production
+approval.
 
 ## Phase 2 — make releases immutable
 
