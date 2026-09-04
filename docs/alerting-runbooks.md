@@ -16,9 +16,10 @@ and version; repeat notifications no more than once every 15 minutes.
 ### Room errors
 
 Check the room event rate by operation and result, then inspect the matching
-trace and redacted application log. If the error follows a release, promote the
-last known-good immutable image. Do not change either environment's database
-connection during an application rollback.
+trace and redacted application log. If the error follows a release, revert the
+release through a reviewed PR or redeploy the previous successful Railway
+deployment. Do not change either environment's database connection during an
+application rollback.
 
 ### High room-update latency
 
@@ -37,9 +38,10 @@ cannot be observed.
 ### Service down
 
 Open `/health`, inspect the Railway deployment and managed PostgreSQL service,
-and check the latest deployment logs. If the app image is unhealthy, promote a
-recorded good digest. Database restoration is a separate reviewed operation;
-never point production at development PostgreSQL.
+and check the latest deployment logs. If the app is unhealthy, revert the
+release or redeploy the previous successful Railway deployment. Database
+restoration is a separate reviewed operation; never point production at
+development PostgreSQL.
 
 ## Safe verification
 

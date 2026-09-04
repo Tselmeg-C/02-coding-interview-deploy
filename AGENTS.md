@@ -11,13 +11,13 @@
   pull request back into `dev`. Do not stack implementation phase PRs directly
   onto `main`.
 - Merge phases into `dev` only after required checks and review pass. Promote
-  the exact verified immutable image from `dev` to `main` through the protected
-  production workflow; never bypass branch protection or push directly to
-  `dev` or `main`.
+  releases by merging the verified `dev` branch into protected `main`; Railway
+  deploys each branch's GitHub source after CI passes. Never bypass branch
+  protection or push directly to `dev` or `main`.
 - For deployment work, keep the app and Postgres runnable through Docker
   Compose; add an integration check and a two-browser end-to-end check before
   enabling deployment automation.
 - Railway production deployments must use the managed PostgreSQL service via
-  `DATABASE_URL`. Keep the Railway account/workspace token in the GitHub
-  `RAILWAY_API_TOKEN` secret and deployment identifiers in GitHub variables;
-  never commit credential values.
+  `DATABASE_URL`. Configure Railway GitHub-source autodeploy with **Wait for
+  CI** for `dev` and `main`; keep credentials in Railway/GitHub configuration,
+  never in commits.

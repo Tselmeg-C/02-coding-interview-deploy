@@ -109,9 +109,9 @@ changes, a release is promoted, or an operational check fails.
   frontend JavaScript and JSX patterns are now listed separately so the
   required type-check includes components, services, and workers.
 - The PR #22 finding identified drift between `instruction.md` and the active
-  CI/CD workflow. Phase 1 now documents the implemented `dev` development
-  deployment and approval-gated `main` production deployment, while Phase 2
-  remains responsible for immutable image promotion and rollback.
+  CI/CD workflow. The current policy uses Railway GitHub-source deployment for
+  both branches with **Wait for CI**; the former immutable-image promotion
+  plan is superseded.
 - Verification selected eight frontend JavaScript/JSX files spanning the app,
   tests, components, services, and browser worker. The corrected type-check,
   lint, backend and frontend tests, Compose/PostgreSQL integration check, and

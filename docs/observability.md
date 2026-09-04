@@ -21,7 +21,7 @@ OTEL_TRACES_EXPORTER=otlp
 OTEL_METRICS_EXPORTER=otlp
 OTEL_LOGS_EXPORTER=otlp
 DEPLOYMENT_ENVIRONMENT=development|production
-SERVICE_VERSION=<image-tag-or-digest>
+SERVICE_VERSION=<deployed-commit-or-Railway-version>
 ```
 
 Keep the endpoint HTTPS, keep the header in a Railway secret, and do not place

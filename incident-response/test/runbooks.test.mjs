@@ -16,7 +16,7 @@ function run(script, env) {
 
 test('rollback refuses to run without human approval', async () => {
   const result = await run('incident-response/runbooks/rollback.sh', {
-    ROLLBACK_IMAGE: 'sha256:' + 'a'.repeat(64),
+    ROLLBACK_COMMIT: 'a'.repeat(40),
     HUMAN_APPROVED: '',
   });
   assert.notEqual(result.code, 0);

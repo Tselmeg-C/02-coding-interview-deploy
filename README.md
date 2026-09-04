@@ -21,7 +21,7 @@ npm test
 
 See [`docs/testing.md`](docs/testing.md) for the complete local and deployed
 release gates, and [`docs/release-process.md`](docs/release-process.md) for
-promotion and rollback.
+release and rollback.
 
 Run the production-like stack, including Postgres, with:
 
@@ -146,7 +146,7 @@ manual spans and bounded counters cover room join/update events. Set
 `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and the three
 `OTEL_*_EXPORTER=otlp` settings in each Railway environment. Set
 `DEPLOYMENT_ENVIRONMENT` to `development` or `production` and
-`SERVICE_VERSION` to the deployed image tag or digest. The application does
+`SERVICE_VERSION` to the deployed commit or Railway version. The application does
 not emit room IDs, participant IDs, source code, credentials, connection
 strings, or raw URLs to telemetry.
 
@@ -159,39 +159,21 @@ changing telemetry variables.
 
 `.github/workflows/ci-cd.yml` runs backend and frontend checks in parallel,
 then runs lint and type checks, builds Docker Compose, runs the Postgres
-integration smoke test, and runs the two-session Playwright test. A push to
-`dev` builds and publishes one immutable GHCR image tagged with its UTC
-timestamp and short commit SHA, then deploys that image digest to Railway
-development only after those checks pass. Pull requests and pushes to `main`
-run validation only. The manual production workflow accepts a release tag or
-digest, verifies that development is running that digest, waits for the
-protected `production` environment approval, promotes or rolls back the same
-image without rebuilding, and runs production health, HTTP, and two-browser
-verification. No source deploy runs automatically on `main`.
+integration smoke test, and runs the two-session Playwright test. Railway
+services are connected to this repository: `dev` deploys the `dev` branch and
+production deploys `main`. Enable Railway **Wait for CI** so either service
+deploys only after the corresponding GitHub checks pass. After each deployment,
+verify health, HTTP behavior, persistence, and two-browser collaboration.
 
-Configure these values in the GitHub environment named `development`:
-
-This GitHub configuration scope is separate from the Railway environment named
-by `RAILWAY_ENVIRONMENT`.
-
-- Secret: `RAILWAY_API_TOKEN` — a Railway account or workspace token. Prefer
-  workspace scope when Railway offers that choice.
-- Variables: `RAILWAY_PROJECT_ID`, `RAILWAY_SERVICE`,
-  `RAILWAY_ENVIRONMENT`, and `RAILWAY_PUBLIC_URL` — the Railway project ID,
-  existing app service, development environment, and public base URL
-  respectively.
-
-Configure the same secret and variables in the GitHub environment named
-`production`, using the production app service, Railway environment, and public
-URL. Keep that GitHub environment restricted to protected branches and require
-an approving reviewer so a merge to `main` cannot deploy without approval.
-
-No credential values belong in the repository, GitHub variables, command
-output, or documentation. The workflow invokes Railway's CI mode and uses the
-configured service and environment explicitly.
+Configure the Railway GitHub integration for this repository with the `dev`
+branch in development and `main` in production. Enable **Wait for CI** on both
+services. Keep production restricted to protected branches and require an
+approving reviewer. Store `DATABASE_URL` and telemetry secrets only in their
+matching Railway environments; no credential values belong in the repository
+or workflow logs.
 
 Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
-promotion, rollback, incident evidence, and recovery checklist.
+rollback, incident evidence, and recovery checklist.
 
 ## Project progress
 

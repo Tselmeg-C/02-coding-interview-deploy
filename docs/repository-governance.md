@@ -7,7 +7,7 @@ This document implements the repository-controls portion of
 
 | Branch | Purpose | Deployment target |
 | --- | --- | --- |
-| `main` | Release-ready code, updated only through a release PR from `dev` | Production, only through approved manual promotion of the tested image digest |
+| `main` | Release-ready code, updated only through a release PR from `dev` | Production, deployed from the protected GitHub source after CI |
 | `dev` | Integration branch, updated through reviewed feature PRs | Development after CI passes |
 | `type/issue-number-summary` | Short-lived implementation branch from `dev` | None directly |
 
@@ -25,9 +25,8 @@ branches and requires approval from the project owner.
 
 Production must receive its own `DATABASE_URL` from its Railway PostgreSQL
 service. Never share a database, public URL, or telemetry credential between
-development and production. `RAILWAY_API_TOKEN` belongs only in the matching
-GitHub environment secret; Railway identifiers and public URL belong in GitHub
-environment variables.
+development and production. Keep deployment configuration and credentials in
+the matching Railway environment rather than duplicating them in workflows.
 
 ## Enforced controls
 
