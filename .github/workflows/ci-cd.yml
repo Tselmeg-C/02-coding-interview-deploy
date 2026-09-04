@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
 
 jobs:
   backend:
@@ -102,7 +102,8 @@ jobs:
         shell: bash
         run: |
           tag="$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA:0:7}"
-          echo "image=${IMAGE_NAME}:${tag}" >> "$GITHUB_OUTPUT"
+          image="$(printf '%s' "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')"
+          echo "image=${image}:${tag}" >> "$GITHUB_OUTPUT"
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         id: push
