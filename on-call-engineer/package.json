@@ -1,0 +1,6 @@
+{
+  "name": "paircode-on-call-engineer",
+  "private": true,
+  "type": "module",
+  "scripts": {"test": "node --test"}
+}

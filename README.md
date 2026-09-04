@@ -19,6 +19,10 @@ Run all automated checks with:
 npm test
 ~~~
 
+See [`docs/testing.md`](docs/testing.md) for the complete local and deployed
+release gates, and [`docs/release-process.md`](docs/release-process.md) for
+promotion and rollback.
+
 Run the production-like stack, including Postgres, with:
 
 ~~~bash
@@ -105,6 +109,10 @@ and keeps local database data in the named `postgres-data` volume. The Compose
 stack is deliberately for local development and CI; its trust-authenticated
 database must not be exposed publicly.
 
+Run the disposable PostgreSQL backup/restore check with
+`npm run test:backup-restore` while the Compose stack is running. See
+[`docs/database-backup-restore.md`](docs/database-backup-restore.md).
+
 `npm run test:integration` verifies the health endpoint plus room creation,
 update, and retrieval against that stack. `npm run test:e2e` uses Playwright to
 create a room in one browser session and verify that an edit reaches a second
@@ -154,14 +162,12 @@ then runs lint and type checks, builds Docker Compose, runs the Postgres
 integration smoke test, and runs the two-session Playwright test. A push to
 `dev` builds and publishes one immutable GHCR image tagged with its UTC
 timestamp and short commit SHA, then deploys that image digest to Railway
-development only after those checks pass. A push to `main` deploys to Railway
-production after the same checks and approval through the protected GitHub
-`production` environment; production remains source-deployed until the
-promotion workflow in Issue #4. The manual production workflow accepts a
-release tag or digest, verifies that development is running that digest, waits
-for the protected `production` environment approval, and promotes or rolls
-back the same image without rebuilding. Both deployments verify `/health` afterwards.
-Pull requests run the checks but do not deploy.
+development only after those checks pass. Pull requests and pushes to `main`
+run validation only. The manual production workflow accepts a release tag or
+digest, verifies that development is running that digest, waits for the
+protected `production` environment approval, promotes or rolls back the same
+image without rebuilding, and runs production health, HTTP, and two-browser
+verification. No source deploy runs automatically on `main`.
 
 Configure these values in the GitHub environment named `development`:
 
@@ -183,6 +189,9 @@ an approving reviewer so a merge to `main` cannot deploy without approval.
 No credential values belong in the repository, GitHub variables, command
 output, or documentation. The workflow invokes Railway's CI mode and uses the
 configured service and environment explicitly.
+
+Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
+promotion, rollback, incident evidence, and recovery checklist.
 
 ## Project progress
 

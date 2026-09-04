@@ -1,0 +1,22 @@
+version: 1
+default_level: observe
+
+levels:
+  observe:
+    allow: [collect_allowlisted_evidence]
+    approval: none
+  propose:
+    allow: [collect_allowlisted_evidence, write_investigation_record]
+    approval: none
+  act:
+    allow: [collect_allowlisted_evidence, write_investigation_record, run_recovery_check]
+    approval: human
+
+always_escalate:
+  - security
+  - privacy
+  - data_loss
+  - production_deploy
+  - infrastructure_change
+  - participant_code
+  - missing_evidence

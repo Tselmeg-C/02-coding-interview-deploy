@@ -27,6 +27,10 @@ jobs:
       contents: read
       packages: read
     steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -92,3 +96,15 @@ jobs:
         env:
           RAILWAY_PUBLIC_URL: ${{ vars.RAILWAY_PUBLIC_URL }}
         run: curl --fail --show-error --retry 12 --retry-delay 5 "$RAILWAY_PUBLIC_URL/health"
+      - name: Install production verification dependencies
+        run: npm ci
+      - name: Verify production HTTP behavior
+        env:
+          APP_URL: ${{ vars.RAILWAY_PUBLIC_URL }}
+        run: npm run test:integration
+      - name: Install Chromium for production verification
+        run: npx playwright install --with-deps chromium
+      - name: Verify production collaboration
+        env:
+          APP_URL: ${{ vars.RAILWAY_PUBLIC_URL }}
+        run: npm run test:e2e

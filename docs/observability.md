@@ -54,6 +54,11 @@ and select the Prometheus data source created by Grafana Cloud. Metric names,
 boundaries, and intentionally deferred product metrics are listed in
 [`metrics.md`](metrics.md).
 
+Load the alert rules from
+[`observability/alerts.yaml`](../observability/alerts.yaml)
+and follow [`alerting-runbooks.md`](alerting-runbooks.md) for response and
+safe test-alert verification.
+
 The provider account, access policy, endpoint, retention choice, and Railway
 secret values are operational state and must be recorded in the team's secure
 handoff system, never committed here.
