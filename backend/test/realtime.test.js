@@ -43,16 +43,26 @@ test('broadcasts a room update only to other clients in the room', async (contex
   candidate.emit('room:join', { roomId: room.id });
   await Promise.all([interviewerState, candidateState]);
 
-  const interviewerUpdate = once(interviewer, 'room:updated');
   let echoedToCandidate = false;
   candidate.once('room:updated', () => {
     echoedToCandidate = true;
   });
-  candidate.emit('room:update', { roomId: room.id, code: 'print("shared")', language: 'python' });
+  const finalCode = 'print("shared from candidate")';
+  const interviewerUpdate = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('timed out waiting for final room update')), 1000);
+    interviewer.on('room:updated', (updatedRoom) => {
+      if (updatedRoom.code === finalCode) {
+        clearTimeout(timeout);
+        resolve(updatedRoom);
+      }
+    });
+  });
+  for (let index = 1; index <= finalCode.length; index += 1) {
+    candidate.emit('room:update', { roomId: room.id, code: finalCode.slice(0, index), language: 'python' });
+  }
 
   const fromInterviewer = await interviewerUpdate;
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  assert.equal(fromInterviewer.code, 'print("shared")');
+  assert.equal(fromInterviewer.code, finalCode);
   assert.equal(fromInterviewer.language, 'python');
   assert.equal(echoedToCandidate, false);
 });
