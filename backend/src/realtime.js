@@ -14,6 +14,44 @@ function roomError(socket, error, message) {
 }
 
 export function attachRealtimeHandlers(io, store) {
+  const updateQueues = new Map();
+
+  async function updateRoom(socket, payload) {
+    return tracer.startActiveSpan('room.update', async (span) => {
+      const startedAt = performance.now();
+      try {
+        const roomId = payload?.roomId;
+        const patch = payload && typeof payload === 'object'
+          ? { code: payload.code, language: payload.language }
+          : null;
+        if (patch && patch.code === undefined) delete patch.code;
+        if (patch && patch.language === undefined) delete patch.language;
+        if (typeof roomId !== 'string' || !isRoomUpdate(patch)) {
+          roomEvents.add(1, { operation: 'update', result: 'validation_error' });
+          roomError(socket, 'validation_error', 'Provide a room ID and at least one supported room field.');
+          return;
+        }
+        const room = await store.update(roomId, patch);
+        if (!room) {
+          roomEvents.add(1, { operation: 'update', result: 'not_found' });
+          roomError(socket, 'room_not_found', 'This interview room does not exist.');
+          return;
+        }
+        socket.to(room.id).emit('room:updated', room);
+        roomUpdateDuration.record(performance.now() - startedAt, { result: 'success' });
+        roomEvents.add(1, { operation: 'update', result: 'success' });
+      } catch (error) {
+        recordException(span, error);
+        span.setStatus({ code: 2 });
+        roomEvents.add(1, { operation: 'update', result: 'error' });
+        roomUpdateDuration.record(performance.now() - startedAt, { result: 'error' });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  }
+
   io.on('connection', (socket) => {
     let joined = false;
     socket.on('disconnect', () => {
@@ -46,38 +84,14 @@ export function attachRealtimeHandlers(io, store) {
       }
     }));
 
-    socket.on('room:update', (payload) => tracer.startActiveSpan('room.update', async (span) => {
-      const startedAt = performance.now();
-      try {
-        const roomId = payload?.roomId;
-        const patch = payload && typeof payload === 'object'
-          ? { code: payload.code, language: payload.language }
-          : null;
-        if (patch && patch.code === undefined) delete patch.code;
-        if (patch && patch.language === undefined) delete patch.language;
-        if (typeof roomId !== 'string' || !isRoomUpdate(patch)) {
-          roomEvents.add(1, { operation: 'update', result: 'validation_error' });
-          roomError(socket, 'validation_error', 'Provide a room ID and at least one supported room field.');
-          return;
-        }
-        const room = await store.update(roomId, patch);
-        if (!room) {
-          roomEvents.add(1, { operation: 'update', result: 'not_found' });
-          roomError(socket, 'room_not_found', 'This interview room does not exist.');
-          return;
-        }
-        socket.to(room.id).emit('room:updated', room);
-        roomUpdateDuration.record(performance.now() - startedAt, { result: 'success' });
-        roomEvents.add(1, { operation: 'update', result: 'success' });
-      } catch (error) {
-        recordException(span, error);
-        span.setStatus({ code: 2 });
-        roomEvents.add(1, { operation: 'update', result: 'error' });
-        roomUpdateDuration.record(performance.now() - startedAt, { result: 'error' });
-        throw error;
-      } finally {
-        span.end();
-      }
-    }));
+    socket.on('room:update', (payload) => {
+      const roomId = payload?.roomId;
+      const previous = updateQueues.get(roomId) ?? Promise.resolve();
+      const current = previous.catch(() => {}).then(() => updateRoom(socket, payload));
+      updateQueues.set(roomId, current);
+      current.finally(() => {
+        if (updateQueues.get(roomId) === current) updateQueues.delete(roomId);
+      }).catch(() => {});
+    });
   });
 }
