@@ -13,8 +13,8 @@ Updated: September 3, 2026.
 - The CI chain includes backend tests, frontend tests and build, lint,
   type-checking, a Compose/Postgres integration smoke test, and a two-browser
   Playwright collaboration test.
-- Pushes to `main` run the same release gate and then wait for approval through
-  the protected GitHub `production` environment before deploying.
+- Pushes to `main` run validation only. Production is deployed by the manual
+  exact-digest promotion or rollback workflow after protected approval.
 
 ## Verified work
 
