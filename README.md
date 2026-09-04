@@ -191,6 +191,9 @@ configured service and environment explicitly.
 Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
 promotion, rollback, incident evidence, and recovery checklist.
 
+Use [`docs/review-cadence.md`](docs/review-cadence.md) for recurring security,
+scale, cost, and resource-cleanup reviews.
+
 ## Project progress
 
 As of September 3, 2026:
