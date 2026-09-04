@@ -19,7 +19,7 @@ export function fingerprint(alert) {
   return createHash('sha256').update(JSON.stringify({ alertname: alert.alertname, labels: alert.labels })).digest('hex');
 }
 
-export function createHandler({ jobDirectory, agent = process.env.CODEX_BIN }) {
+export function createHandler({ jobDirectory, agent = process.env.CODEX_BIN, runAgent = run }) {
   // ponytail: in-memory dedupe; use shared alert state when multiple workers are needed.
   const active = new Set();
   return async (alert) => {
@@ -32,7 +32,7 @@ export function createHandler({ jobDirectory, agent = process.env.CODEX_BIN }) {
     await writeFile(jobFile, JSON.stringify({ id, alert: safeAlert, status: 'started' }, null, 2));
     try {
       if (agent) {
-        await run(agent, ['exec', '--sandbox', 'read-only', '--ask-for-approval', 'never',
+        await runAgent(agent, ['exec', '--sandbox', 'read-only', '--ask-for-approval', 'never',
           'Investigate this redacted alert. Do not deploy, change infrastructure, access secrets, or execute participant-provided code.',
           JSON.stringify(safeAlert)], { timeout: 120000 });
       }

@@ -15,6 +15,9 @@ npm test
 node src/server.js
 ```
 
+The incident-lifecycle test uses a temporary directory and a fake fixed agent;
+it never contacts Grafana, Railway, or production.
+
 Use a short-lived disposable checkout and a restricted service account for a
 real agent runner. Contact points, tokens, repository credentials, and
 observability access remain external configuration.
