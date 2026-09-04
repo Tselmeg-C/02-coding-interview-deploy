@@ -68,8 +68,9 @@ jobs:
               exit 1
             fi
           done
-          status="$(npx --yes @railway/cli service status --json --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT")"
-          echo "$status" | jq -e --arg digest "$DIGEST" 'tostring | contains($digest)' >/dev/null || {
+          status="$(npx --yes @railway/cli status --json --project "$RAILWAY_PROJECT_ID" --environment "$RAILWAY_ENVIRONMENT")"
+          echo "$status" | jq -e --arg service "$RAILWAY_SERVICE" --arg digest "$DIGEST" \
+            '[.. | objects | select(.serviceName? == $service) | .latestDeployment.meta.imageDigest] | any(.[]; . == $digest)' >/dev/null || {
             echo "Development is not running requested digest $DIGEST" >&2
             exit 1
           }
