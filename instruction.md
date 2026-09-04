@@ -11,19 +11,15 @@ is updated, and its changes are committed locally.
 - Keep `main` continuously deployable. Pull requests must pass backend,
   frontend, Compose/Postgres integration, and two-browser E2E checks before
   merge.
-- Treat development and production as independent environments. A validated
-  push to `dev` deploys development; a validated push to `main` waits for the
-  protected production-environment approval before deploying production.
-  Phase 2 replaces these source deployments with exact-digest promotion.
-- Build once, deploy the resulting immutable image many times. Never rebuild
-  source code during promotion.
+- Treat development and production as independent environments. Railway
+  deploys the `dev` and `main` GitHub sources only after GitHub Actions passes
+  and Railway **Wait for CI** is satisfied.
 - The Railway production application must use the managed PostgreSQL service
   through `DATABASE_URL`. Do not substitute a container SQLite file.
 - Do not put telemetry backends, Grafana, databases, credentials, or tokens on
   the public internet without authentication and network restrictions.
-- Never commit, echo, or add a credential to documentation. Keep the Railway
-  account/workspace token only in GitHub's `RAILWAY_API_TOKEN` secret; store
-  Railway IDs and public URL in GitHub variables.
+- Never commit, echo, or add a credential to documentation. Keep Railway
+  credentials and environment variables in Railway's matching environments.
 - The backend must never run participant-provided code. Browser Web Workers
   remain the only code-execution location.
 
@@ -67,14 +63,12 @@ independent browser sessions.
 
    - Pull requests run the complete release gate without deploying.
    - A successful push to `dev` deploys to development.
-   - A successful push to `main` runs the same gate, waits for approval through
-     the protected GitHub `production` environment, and deploys production.
-   - Protect the GitHub production environment with required reviewer
-     approval. The documented single-owner demo exception may satisfy this
-     gate only after every automated check passes.
-   - Treat this as a transitional source-deployment baseline. Issue #3 and
-     Phase 2 replace it with build-once immutable images before exact-digest
-     promotion and rollback are enabled.
+   - A successful push to `main` runs the same gate; the protected release PR
+     and Railway production settings control the production deployment.
+   - Protect `main` with required review. The documented single-owner demo
+     exception may satisfy this gate only after every automated check passes.
+   - Enable Railway **Wait for CI** on both services so successful GitHub
+     checks gate the native Railway GitHub-source deployments.
 
 5. In each environment, run `/health`, create a room, join it from two
    browsers, and synchronize an edit.
@@ -83,30 +77,21 @@ independent browser sessions.
 only after the full release gate and an explicitly recorded production
 approval.
 
-## Phase 2 — make releases immutable
+## Phase 2 — use Railway-native continuous deployment
 
-1. Add a `build-image` CI job before deployment. It must build the root
-   `Dockerfile`, run the release gate, and push the image to a container
-   registry that Railway can pull from.
-2. Tag every image with a timestamp and source revision in this format:
+1. Connect the development service to the repository's `dev` branch and the
+   production service to its `main` branch.
+2. Enable Railway **Wait for CI** on both services. GitHub Actions remains the
+   quality gate; Railway performs the deployment after the matching push checks
+   pass.
+3. Keep production restricted to protected `main`, with the required reviewer
+   approval and separate production PostgreSQL.
+4. Verify `/health`, HTTP behavior, persistence, and two-browser collaboration
+   after each environment deployment. Record the commit and deployment time.
 
-   ```text
-   YYYYMMDD-HHMMSS-shortsha
-   ```
-
-   Also record the immutable image digest. The digest, rather than a mutable
-   tag, is the authoritative promoted artifact.
-3. Make the development deploy job pull/deploy that published image. Record
-   its tag, digest, commit SHA, and deployment time as the deployed version.
-4. Have the manual production workflow accept the already-tested development
-   tag/digest and deploy exactly that artifact. It must verify that the
-   requested digest is the one currently running in development before
-   proceeding.
-5. Add a rollback input/workflow that redeploys a prior known-good digest. Do
-   not roll back by rebuilding an old branch.
-
-**Exit criterion:** development and production report the same image digest
-for a promoted release, and a previous digest can be restored deliberately.
+**Exit criterion:** a reviewed merge to `dev` deploys development after CI, and
+a reviewed `dev`-to-`main` merge deploys production without a second build or
+manual image/registry configuration.
 
 ## Phase 3 — instrument application and runtime telemetry
 
@@ -247,7 +232,7 @@ credentials or direct production mutation authority.
    ```
 
 4. For production, change "commit the fix" to "open a reviewable branch or
-   pull request". A human must approve CI and the manual promotion; the agent
+   pull request". A human must approve CI and the protected release PR; the agent
    must not deploy, alter infrastructure, access secrets, or execute
    participant-provided code.
 5. Escalate immediately to a human for security incidents, data loss/corruption,
@@ -267,12 +252,12 @@ For every release:
 
 1. Run the Phase 0 release gate and inspect the development deployment.
 2. Confirm development telemetry, dashboards, and no relevant firing alerts.
-3. Record the exact image digest/version approved for production.
-4. Manually promote it; verify `/health`, a room lifecycle, and two-browser
-   synchronization in production.
+3. Record the production commit and deployment time.
+4. Verify `/health`, a room lifecycle, and two-browser synchronization in
+   production after Railway reports deployment success.
 5. Watch the version-filtered production dashboard during the agreed initial
-   observation period. If user impact appears, use the documented rollback
-   workflow to redeploy the prior digest, then investigate.
+   observation period. If user impact appears, revert the release commit or
+   redeploy the previous Railway deployment, then investigate.
 6. After an incident, preserve alert/trace/log links, write the root cause and
    remediation, tune the alert if necessary, and add a regression test.
 

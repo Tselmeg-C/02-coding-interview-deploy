@@ -8,27 +8,26 @@ protected GitHub `production` environment.
 
 1. Merge the reviewed change into `dev` and wait for backend, frontend, lint,
    type-check, Compose/PostgreSQL integration, and two-browser checks.
-2. Confirm the development deployment health check and record the image tag,
-   full `sha256:` digest, commit, and UTC deployment time.
+2. Confirm Railway reports the development deployment successful and record the
+   commit and UTC deployment time.
 3. Observe development in Grafana for one normal traffic window. Filter the
    PairCode dashboard by `deployment_environment_name` and `service_version`.
-4. Run the production promotion workflow with the exact tag or digest. It
-   verifies that the same digest is running in development and waits for the
-   protected production approval.
+4. Open a release PR from `dev` to `main`; after review and required checks,
+   Railway deploys production from the protected `main` source.
 5. Verify `/health`, room creation/update/retrieval, persistence after an app
    restart, and the two-browser collaboration check in production.
 
-Never rebuild during promotion, use `latest`, share a `DATABASE_URL`, or point
-production at development PostgreSQL.
+Never use `latest`, share a `DATABASE_URL`, or point production at development
+PostgreSQL. Railway builds the connected source in each environment.
 
 ## Rollback
 
-Use the same promotion workflow with `action=rollback` and a recorded good
-image tag or full digest. The workflow verifies the digest in development,
-requires production approval, deploys that exact image, and checks `/health`.
-Then rerun the production integration and two-browser checks. Database
-restoration is separate; use [`database-backup-restore.md`](database-backup-restore.md)
-only under an approved recovery plan.
+Revert the faulty release through a reviewed PR and let Railway redeploy `main`
+after CI. For urgent recovery, redeploy the previous successful Railway
+deployment from the dashboard, then rerun the production integration and
+two-browser checks. Database restoration is separate; use
+[`database-backup-restore.md`](database-backup-restore.md) only under an
+approved recovery plan.
 
 ## Incident response
 

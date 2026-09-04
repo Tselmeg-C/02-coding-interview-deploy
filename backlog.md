@@ -6,22 +6,29 @@ to the existing Node/React/Socket.IO app, Docker Compose, Railway, and managed
 PostgreSQL setup. Complete issues in dependency order. Every implementation
 issue requires tests, documentation, a concise commit, and a reviewed PR.
 
+## Railway CD decision
+
+Railway's native GitHub-source deployment is the chosen CD path. Connect
+development to `dev` and production to `main`, enable Railway **Wait for CI**,
+and use protected pull requests as the release gate. The GHCR build-once and
+manual digest-promotion work described in Issues 3 and 4 is superseded; do not
+add registry or digest configuration for this project.
+
 ## Team workflow
 
 - `main` is production-ready and protected: no direct pushes; require passing
   CI and a review.
 - `dev` is the integration branch. Changes arrive through short-lived feature
   branches and PRs; a validated `dev` commit deploys to development.
-- Production is changed only by an approved manual promotion of the exact
-  immutable artifact already deployed to development. Never rebuild on
-  promotion and never deploy a mutable `latest` tag.
-- Use GitHub environments named `development` and `production`, each with its
-  own Railway app service, managed PostgreSQL service, public URL, and
-  telemetry credentials. Production requires a reviewer approval gate.
-- Keep Railway's account/workspace token exclusively in GitHub
-  `RAILWAY_API_TOKEN` secrets. Use GitHub variables for project/service/
-  environment/public URL identifiers. Never commit, print, or request secret
-  values.
+- Production is changed only through a reviewed release PR from `dev` to
+  protected `main`; Railway deploys the connected source after CI and its
+  production approval gate.
+- Use independent Railway `development` and `production` environments, each
+  with its own app service, managed PostgreSQL service, public URL, and
+  telemetry credentials.
+- Keep Railway credentials and environment values in Railway's project
+  configuration or its GitHub integration. Never commit, print, or request
+  secret values.
 - The backend must never execute participant-provided code. Browser Web
   Workers remain the only execution environment.
 
@@ -54,6 +61,8 @@ storage or shared database is used.
 
 ### Issue 3 — Replace source deploys with build-once immutable images
 
+**Status:** Superseded by the Railway CD decision above.
+
 **Depends on:** #1, #2  
 **Labels:** `platform`, `priority:high`, `type:ci`
 
@@ -65,6 +74,8 @@ image to development. Record tag, digest, commit, and deployment time.
 CI separates build from deploy; the build fails before any deploy begins.
 
 ### Issue 4 — Add approved production promotion and rollback workflows
+
+**Status:** Superseded by the Railway CD decision above.
 
 **Depends on:** #3  
 **Labels:** `platform`, `priority:high`, `type:ci`
