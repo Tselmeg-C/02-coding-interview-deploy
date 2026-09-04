@@ -1,7 +1,7 @@
 # Alerting and runbooks
 
 The version-controlled alert rules are in
-[`observability/alerts/paircode-alerts.yaml`](../observability/alerts/paircode-alerts.yaml).
+[`observability/alerts.yaml`](../observability/alerts.yaml).
 Load them into the managed Grafana alerting system and set
 `DASHBOARD_URL` to the saved PairCode dashboard URL. Keep contact points and
 authentication outside the repository.
