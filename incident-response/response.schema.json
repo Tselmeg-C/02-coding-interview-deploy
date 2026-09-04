@@ -5,6 +5,10 @@
   "required": ["incident_id", "alert", "evidence", "proposed_action", "policy_decision", "recovery"],
   "properties": {
     "incident_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+    "collected_at_utc": {"type": "string", "format": "date-time"},
+    "service": {"const": "paircode-interview"},
+    "environment": {"type": "string"},
+    "version_or_digest": {"type": "string"},
     "alert": {"type": "object"},
     "evidence": {"type": "array", "items": {"type": "object"}},
     "proposed_action": {"type": "string"},
