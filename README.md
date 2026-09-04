@@ -188,6 +188,9 @@ No credential values belong in the repository, GitHub variables, command
 output, or documentation. The workflow invokes Railway's CI mode and uses the
 configured service and environment explicitly.
 
+Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
+promotion, rollback, incident evidence, and recovery checklist.
+
 ## Project progress
 
 As of September 3, 2026:
