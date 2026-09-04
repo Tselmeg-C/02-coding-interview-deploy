@@ -105,6 +105,10 @@ and keeps local database data in the named `postgres-data` volume. The Compose
 stack is deliberately for local development and CI; its trust-authenticated
 database must not be exposed publicly.
 
+Run the disposable PostgreSQL backup/restore check with
+`npm run test:backup-restore` while the Compose stack is running. See
+[`docs/database-backup-restore.md`](docs/database-backup-restore.md).
+
 `npm run test:integration` verifies the health endpoint plus room creation,
 update, and retrieval against that stack. `npm run test:e2e` uses Playwright to
 create a room in one browser session and verify that an edit reaches a second
