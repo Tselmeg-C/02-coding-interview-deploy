@@ -1,0 +1,68 @@
+groups:
+  - name: paircode-interview
+    rules:
+      - alert: PairCodeRoomErrors
+        expr: sum by (deployment_environment_name, service_version) (rate(paircode_room_events_total{result="error"}[5m])) > 0
+        for: 10m
+        labels:
+          service: paircode-interview
+          severity: warning
+          owner: demo-owner
+        annotations:
+          summary: PairCode room operations are failing
+          environment: '{{ $labels.deployment_environment_name }}'
+          version: '{{ $labels.service_version }}'
+          dashboard: '${DASHBOARD_URL}'
+          user_impact: Participants may be unable to join rooms or save edits.
+          first_action: Check the room event traces and application logs for the failure class.
+          escalation: Escalate to the service owner if the alert lasts 15 minutes or affects both environments.
+
+      - alert: PairCodeRoomUpdateLatencyHigh
+        expr: histogram_quantile(0.95, sum by (le, deployment_environment_name, service_version) (rate(paircode_room_update_duration_bucket[5m]))) > 1000
+        for: 10m
+        labels:
+          service: paircode-interview
+          severity: warning
+          owner: demo-owner
+        annotations:
+          summary: PairCode room update p95 latency is above one second
+          environment: '{{ $labels.deployment_environment_name }}'
+          version: '{{ $labels.service_version }}'
+          dashboard: '${DASHBOARD_URL}'
+          user_impact: Edits may appear delayed to collaborators.
+          first_action: Check the room update latency panel, traces, and database connectivity.
+          escalation: Escalate to the service owner if latency remains high for 15 minutes.
+
+      - alert: PairCodeTelemetryMissing
+        expr: absent(paircode_room_events_total)
+        for: 15m
+        labels:
+          service: paircode-interview
+          severity: critical
+          owner: demo-owner
+          deployment_environment_name: unknown
+          service_version: unknown
+        annotations:
+          summary: PairCode room event telemetry is missing
+          environment: unknown
+          version: unknown
+          dashboard: '${DASHBOARD_URL}'
+          user_impact: Operational failures may be invisible and cannot be diagnosed reliably.
+          first_action: Check the Railway service, OTLP endpoint, authentication secret, and exporter status.
+          escalation: Escalate immediately if the service is serving users without telemetry.
+
+      - alert: PairCodeServiceDown
+        expr: up{job="paircode-interview"} == 0
+        for: 5m
+        labels:
+          service: paircode-interview
+          severity: critical
+          owner: demo-owner
+        annotations:
+          summary: PairCode service health scrape is failing
+          environment: '{{ $labels.deployment_environment_name | default "unknown" }}'
+          version: '{{ $labels.service_version | default "unknown" }}'
+          dashboard: '${DASHBOARD_URL}'
+          user_impact: Participants cannot create rooms or collaborate.
+          first_action: Open the service health endpoint, then check Railway deployment and database status.
+          escalation: Escalate immediately and promote the last known-good image if the deployment is unhealthy.
