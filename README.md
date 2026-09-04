@@ -19,6 +19,10 @@ Run all automated checks with:
 npm test
 ~~~
 
+See [`docs/testing.md`](docs/testing.md) for the complete local and deployed
+release gates, and [`docs/release-process.md`](docs/release-process.md) for
+promotion and rollback.
+
 Run the production-like stack, including Postgres, with:
 
 ~~~bash
