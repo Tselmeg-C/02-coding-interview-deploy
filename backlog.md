@@ -215,6 +215,60 @@ in the provider console.
 **Acceptance criteria:** Owners, cadence, findings, and remediation PRs are
 tracked; no resource is deleted without an approved recovery plan.
 
+## Milestone 4 — operations and security report
+
+These follow-ups cover the remaining deliverables from the 2026 DevOps lesson:
+bounded evidence, responder authorization, security audit, and a final
+secret-free reconstruction of a production incident.
+
+### Issue 14 — Add bounded incident evidence and response controls
+
+**GitHub:** [#49](https://github.com/Tselmeg-C/02-coding-interview-deploy/issues/49)
+**Depends on:** #8, #9, #10
+**Labels:** `on-call`, `priority:high`, `type:feature`
+
+Add the `incident-response/` evidence collector, responder task, structured
+response schema, autonomy policy, rollback/recovery runbooks, and incident
+records. Evidence queries must be allowlisted and bounded, with redaction and
+human escalation enforced outside the model.
+
+**Acceptance criteria:** One incident ID reconstructs alert, evidence,
+model/configuration, proposed action, policy decision, executed command, and
+recovery or escalation without secrets, participant content, source code, or
+credential-bearing URLs. A disposable test covers evidence collection, policy
+denial, escalation, and recovery verification.
+
+### Issue 15 — Add responder security audit and capability inventory
+
+**GitHub:** [#50](https://github.com/Tselmeg-C/02-coding-interview-deploy/issues/50)
+**Depends on:** #14
+**Labels:** `platform`, `priority:high`, `type:chore`
+
+Add the `security-audit/` brief, deterministic Semgrep or approved-equivalent
+scan, findings schema and runs, and a capability/credential/provenance table.
+Require human validation and remediation tracking for security, privacy,
+data-loss, and repeated-failure findings.
+
+**Acceptance criteria:** Every responder capability and credential has a least-
+privilege owner. Findings include severity, evidence, disposition, owner,
+remediation PR, and due date. Audit artifacts are secret-free.
+
+### Issue 16 — Publish operations and security report with final production evidence
+
+**GitHub:** [#51](https://github.com/Tselmeg-C/02-coding-interview-deploy/issues/51)
+**Depends on:** #14, #15
+**Labels:** `docs`, `priority:medium`, `type:chore`
+
+Publish `docs/operations-and-security-report.md` linking observability,
+alerting, incident response, security audit, release, rollback, backup, and
+final production verification evidence.
+
+**Acceptance criteria:** The report identifies deployed version, user impact,
+alert, evidence, model/configuration, proposed action, policy decision,
+executed command, recovery verification, and security disposition. It records
+the final production health, HTTP integration, persistence, two-browser,
+image-digest, deployment-time, and rollback-readiness evidence without secrets.
+
 ## Definition of done for every backlog item
 
 1. Work on a short-lived branch from `dev` (or `main` only for release-control
