@@ -11,6 +11,7 @@
     "compose:up": "docker compose up --build --wait",
     "compose:down": "docker compose down --volumes --remove-orphans",
     "test:integration": "node integration/compose-smoke.mjs",
+    "test:backup-restore": "bash scripts/postgres-restore-smoke.sh",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
