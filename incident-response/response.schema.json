@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["incident_id", "alert", "evidence", "proposed_action", "policy_decision", "recovery"],
+  "properties": {
+    "incident_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"},
+    "alert": {"type": "object"},
+    "evidence": {"type": "array", "items": {"type": "object"}},
+    "proposed_action": {"type": "string"},
+    "policy_decision": {"enum": ["allowed", "denied", "escalated"]},
+    "executed_command": {"type": "string"},
+    "recovery": {"type": "object"}
+  }
+}
