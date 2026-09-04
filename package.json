@@ -12,6 +12,8 @@
     "compose:down": "docker compose down --volumes --remove-orphans",
     "test:integration": "node integration/compose-smoke.mjs",
     "test:backup-restore": "bash scripts/postgres-restore-smoke.sh",
+    "security-audit": "node security-audit/run.mjs",
+    "test:security-audit": "node --test security-audit/test/*.mjs",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
