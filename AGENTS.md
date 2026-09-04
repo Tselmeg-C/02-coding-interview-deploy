@@ -7,6 +7,13 @@
 - Run the relevant tests before committing a completed workflow phase.
 - Make a concise local Git commit after each verified phase. Do not push unless
   explicitly asked.
+- Implementation phases must use short-lived branches from `dev` and open a
+  pull request back into `dev`. Do not stack implementation phase PRs directly
+  onto `main`.
+- Merge phases into `dev` only after required checks and review pass. Promote
+  the exact verified immutable image from `dev` to `main` through the protected
+  production workflow; never bypass branch protection or push directly to
+  `dev` or `main`.
 - For deployment work, keep the app and Postgres runnable through Docker
   Compose; add an integration check and a two-browser end-to-end check before
   enabling deployment automation.

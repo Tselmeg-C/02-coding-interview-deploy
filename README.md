@@ -19,6 +19,10 @@ Run all automated checks with:
 npm test
 ~~~
 
+See [`docs/testing.md`](docs/testing.md) for the complete local and deployed
+release gates, and [`docs/release-process.md`](docs/release-process.md) for
+promotion and rollback.
+
 Run the production-like stack, including Postgres, with:
 
 ~~~bash
@@ -158,14 +162,12 @@ then runs lint and type checks, builds Docker Compose, runs the Postgres
 integration smoke test, and runs the two-session Playwright test. A push to
 `dev` builds and publishes one immutable GHCR image tagged with its UTC
 timestamp and short commit SHA, then deploys that image digest to Railway
-development only after those checks pass. A push to `main` deploys to Railway
-production after the same checks and approval through the protected GitHub
-`production` environment; production remains source-deployed until the
-promotion workflow in Issue #4. The manual production workflow accepts a
-release tag or digest, verifies that development is running that digest, waits
-for the protected `production` environment approval, and promotes or rolls
-back the same image without rebuilding. Both deployments verify `/health` afterwards.
-Pull requests run the checks but do not deploy.
+development only after those checks pass. Pull requests and pushes to `main`
+run validation only. The manual production workflow accepts a release tag or
+digest, verifies that development is running that digest, waits for the
+protected `production` environment approval, promotes or rolls back the same
+image without rebuilding, and runs production health, HTTP, and two-browser
+verification. No source deploy runs automatically on `main`.
 
 Configure these values in the GitHub environment named `development`:
 
