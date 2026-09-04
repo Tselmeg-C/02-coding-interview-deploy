@@ -8,7 +8,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['backend/**/*.js', 'integration/**/*.mjs', 'on-call-engineer/**/*.js', 'playwright.config.js'],
+    files: ['backend/**/*.js', 'integration/**/*.mjs', 'on-call-engineer/**/*.js', 'security-audit/**/*.mjs', 'playwright.config.js'],
     languageOptions: { globals: globals.node },
   },
   {

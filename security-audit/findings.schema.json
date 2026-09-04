@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["audit_id", "audited_at_utc", "scope", "findings"],
+  "properties": {
+    "audit_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
+    "audited_at_utc": { "type": "string", "format": "date-time" },
+    "scope": { "type": "array", "items": { "type": "string" } },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "evidence", "disposition", "owner", "remediation_pr", "due_date"],
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+          "evidence": { "type": "string" },
+          "disposition": { "type": "string" },
+          "owner": { "type": "string" },
+          "remediation_pr": { "type": "string" },
+          "due_date": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
