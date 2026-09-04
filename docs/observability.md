@@ -55,7 +55,7 @@ boundaries, and intentionally deferred product metrics are listed in
 [`metrics.md`](metrics.md).
 
 Load the alert rules from
-[`observability/alerts/paircode-alerts.yaml`](../observability/alerts/paircode-alerts.yaml)
+[`observability/alerts.yaml`](../observability/alerts.yaml)
 and follow [`alerting-runbooks.md`](alerting-runbooks.md) for response and
 safe test-alert verification.
 
