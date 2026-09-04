@@ -44,7 +44,7 @@ const record = {
   service: 'paircode-interview',
   environment: process.env.DEPLOYMENT_ENVIRONMENT ?? 'unknown',
   version_or_digest: process.env.SERVICE_VERSION ?? 'unknown',
-  alert: process.env.ALERT_NAME ?? 'unknown',
+  alert: { name: process.env.ALERT_NAME ?? 'unknown' },
   evidence: [
     { source: 'health_endpoint', target: '/health', response: JSON.parse(process.env.health) },
     ...(await Promise.all(['metrics.json', 'traces.json', 'logs.json'].map(evidenceFile))),
