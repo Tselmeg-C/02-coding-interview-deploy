@@ -8,8 +8,14 @@ set -euo pipefail
 
 incident_dir="${INCIDENT_DIR:-incident-response/incidents}"
 mkdir -p "$incident_dir"
-health="$(curl --fail --silent --show-error --max-time 5 "$APP_URL/health")"
-export INCIDENT_ID APP_URL health incident_dir EVIDENCE_DIR
+export INCIDENT_ID APP_URL
+health="$(node --input-type=module <<'NODE'
+const response = await fetch(`${process.env.APP_URL}/health`, { signal: AbortSignal.timeout(5000) });
+if (!response.ok) throw new Error(`health check failed (${response.status})`);
+process.stdout.write(await response.text());
+NODE
+)"
+export health incident_dir EVIDENCE_DIR
 
 node --input-type=module <<'NODE'
 import { readFile, writeFile } from 'node:fs/promises';

@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHandler } from '../src/on-call.js';
 
-test('disposable incident lifecycle redacts, deduplicates, and persists completion', async () => {
+test('disposable incident lifecycle redacts, deduplicates, and persists completion', async (context) => {
   const jobDirectory = await mkdtemp(join(tmpdir(), 'paircode-incident-'));
+  context.after(() => rm(jobDirectory, { recursive: true, force: true }));
   let release;
-  const agentStarted = new Promise((resolve) => { release = resolve; });
+  const dispatchStarted = new Promise((resolve) => { release = resolve; });
   const handler = createHandler({
     jobDirectory,
-    agent: 'fixed-read-only-agent',
-    runAgent: async () => agentStarted,
+    dispatch: async () => dispatchStarted,
   });
   const alert = {
     alertname: 'PairCodeRoomErrors',
@@ -26,7 +26,7 @@ test('disposable incident lifecycle redacts, deduplicates, and persists completi
   release();
   const result = await first;
   const record = JSON.parse(await readFile(join(jobDirectory, `${result.id}.json`), 'utf8'));
-  assert.equal(record.status, 'completed');
+  assert.equal(record.status, 'dispatched');
   assert.equal(record.alert.annotations.code, '[REDACTED]');
   assert.equal(record.alert.annotations.logs, 'failed [REDACTED_URL]');
 });

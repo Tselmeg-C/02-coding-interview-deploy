@@ -175,6 +175,17 @@ or workflow logs.
 Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
 rollback, incident evidence, and recovery checklist.
 
+## On-call remediation
+
+Production operation failures emit structured error logs and a bounded error
+counter used by the Grafana alert rules. A separate signed-webhook receiver can
+open a deduplicated GitHub incident, run a sandboxed Codex investigation, test a
+source-only patch, and open a PR into `dev`. Grafana resolution closes the
+incident; merging and production deployment always remain human-reviewed.
+
+See [`on-call-engineer/README.md`](on-call-engineer/README.md) for the Railway,
+GitHub, and Grafana setup.
+
 ## Project progress
 
 As of September 3, 2026:

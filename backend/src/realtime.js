@@ -1,5 +1,5 @@
 import { isRoomUpdate } from './rooms/roomRepository.js';
-import { activeParticipants, meter, roomUpdateDuration, tracer } from './telemetry.js';
+import { activeParticipants, meter, recordOperationError, roomUpdateDuration, tracer } from './telemetry.js';
 
 const roomEvents = meter.createCounter('paircode.room.events', {
   description: 'Room join and update events processed by Socket.IO',
@@ -45,6 +45,7 @@ export function attachRealtimeHandlers(io, store) {
         span.setStatus({ code: 2 });
         roomEvents.add(1, { operation: 'update', result: 'error' });
         roomUpdateDuration.record(performance.now() - startedAt, { result: 'error' });
+        recordOperationError('Room update failed', 'update', error);
         throw error;
       } finally {
         span.end();
@@ -78,6 +79,7 @@ export function attachRealtimeHandlers(io, store) {
         recordException(span, error);
         span.setStatus({ code: 2 });
         roomEvents.add(1, { operation: 'join', result: 'error' });
+        recordOperationError('Room join failed', 'join', error);
         throw error;
       } finally {
         span.end();
