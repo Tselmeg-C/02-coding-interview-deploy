@@ -37,13 +37,58 @@
       "title": "Room update processing p95",
       "type": "timeseries",
       "targets": [{"expr": "histogram_quantile(0.95, sum by (le, result, deployment_environment_name, service_version) (rate(paircode_room_update_duration_bucket{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m])))", "legendFormat": "{{result}} {{deployment_environment_name}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "id": 5,
+      "title": "HTTP traffic / second",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 6,
+      "title": "HTTP 5xx errors / second",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$environment\",service_version=~\"$version\",http_response_status_code=~\"5..\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "id": 7,
+      "title": "HTTP request p95",
+      "type": "timeseries",
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m])))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "id": 8,
+      "title": "Application operation errors / second",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (operation, deployment_environment_name, service_version) (rate(paircode_operation_errors_total{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m]))", "legendFormat": "{{operation}} {{deployment_environment_name}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+      "id": 9,
+      "title": "Health endpoint traffic",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$environment\",service_version=~\"$version\",http_route=\"/health\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
     }
   ],
   "schemaVersion": 39,
   "templating": {
     "list": [
-      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values(paircode_room_events_total, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}},
-      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values(paircode_room_events_total, service_version)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}}
+      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}},
+      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, service_version)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}}
     ]
   },
   "title": "PairCode Interview overview",
