@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
-    "test": "npm run test --prefix backend && npm run test --prefix frontend",
+    "test": "npm run test --prefix backend && npm run test --prefix frontend && npm run test --prefix on-call-engineer && node --test incident-response/test/*.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "compose:up": "docker compose up --build --wait",

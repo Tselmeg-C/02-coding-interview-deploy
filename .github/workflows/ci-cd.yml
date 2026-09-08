@@ -20,6 +20,8 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci --prefix backend
       - run: npm test --prefix backend
+      - run: npm test --prefix on-call-engineer
+      - run: node --test incident-response/test/*.mjs
 
   frontend:
     runs-on: ubuntu-latest

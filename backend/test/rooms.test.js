@@ -59,6 +59,21 @@ test('returns contract errors for missing rooms and invalid updates', async (con
   assert.equal(invalid.body.error, 'validation_error');
 });
 
+test('logs room failures without leaking the exception message', async (context) => {
+  const messages = [];
+  const original = console.error;
+  console.error = (message) => messages.push(message);
+  context.after(() => { console.error = original; });
+  const app = createApp({ create: async () => { throw new Error('password=do-not-log'); } });
+
+  const failed = await request(app).post('/api/rooms').expect(500);
+
+  assert.equal(failed.body.error, 'internal_error');
+  assert.equal(messages.length, 1);
+  assert.match(messages[0], /HTTP room operation failed/);
+  assert.doesNotMatch(messages[0], /do-not-log/);
+});
+
 test('persists rooms after closing and reopening a SQLite database', async (context) => {
   const directory = await mkdtemp(join(tmpdir(), 'paircode-db-'));
   const databaseUrl = 'sqlite:' + join(directory, 'rooms.sqlite3');
