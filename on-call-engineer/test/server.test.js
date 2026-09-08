@@ -12,8 +12,7 @@ async function startServer(context, handler) {
   return `http://127.0.0.1:${server.address().port}`;
 }
 
-function signedRequest(body) {
-  const timestamp = String(Math.floor(Date.now() / 1000));
+function signedRequest(body, timestamp = String(Math.floor(Date.now() / 1000))) {
   return {
     'content-type': 'application/json',
     'x-grafana-alerting-timestamp': timestamp,
@@ -44,6 +43,15 @@ test('rejects unsigned alert payloads', async (context) => {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ alerts: [] }),
   });
+
+  assert.equal(response.status, 401);
+});
+
+test('rejects replayed signed alert payloads', async (context) => {
+  const url = await startServer(context, async () => {});
+  const body = JSON.stringify({ alerts: [] });
+  const stale = String(Math.floor(Date.now() / 1000) - 301);
+  const response = await fetch(`${url}/alerts`, { method: 'POST', headers: signedRequest(body, stale), body });
 
   assert.equal(response.status, 401);
 });

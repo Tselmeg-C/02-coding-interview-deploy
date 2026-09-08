@@ -37,12 +37,24 @@ export const roomUpdateDuration = meter.createHistogram('paircode.room.update.du
   description: 'Time spent processing room updates in milliseconds',
   unit: 'ms',
 });
+const operationErrors = meter.createCounter('paircode.operation.errors', {
+  description: 'Unhandled room operation failures',
+});
 
 export function emitLog(severityText, body, attributes = {}) {
   logger.emit({ severityText, body, attributes });
   if (severityText === 'ERROR') {
     console.error(JSON.stringify({ ...attributes, severity: severityText, message: body }));
   }
+}
+
+export function recordOperationError(message, operation, error) {
+  const attributes = {
+    operation,
+    'error.type': error instanceof Error ? error.name : 'Error',
+  };
+  operationErrors.add(1, attributes);
+  emitLog('ERROR', message, attributes);
 }
 
 export function shutdownTelemetry() {

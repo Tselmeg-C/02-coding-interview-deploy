@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const sensitive = /password|secret|token|authorization|credential|connection|string|source|code|content|url/i;
-const labelNames = ['alertname', 'service', 'deployment_environment_name', 'service_version', 'severity', 'owner'];
+const labelNames = [
+  'alertname', 'service', 'deployment_environment_name', 'service_version',
+  'operation', 'error_type', 'severity', 'owner',
+];
 const annotationNames = ['summary', 'environment', 'version', 'user_impact', 'first_action', 'escalation'];
 
 function boundedString(value, limit = 500) {
@@ -38,7 +41,9 @@ export function normalizeWebhook(payload) {
     const labels = selectStrings(item?.labels, labelNames);
     const alertname = labels.alertname;
     const status = item?.status;
-    if (!alertname || !['firing', 'resolved'].includes(status)) throw new Error('invalid alert');
+    if (!alertname || labels.service !== 'paircode-interview' || !['firing', 'resolved'].includes(status)) {
+      throw new Error('invalid alert');
+    }
     const suppliedFingerprint = boundedString(item.fingerprint, 128);
     return {
       alertname,

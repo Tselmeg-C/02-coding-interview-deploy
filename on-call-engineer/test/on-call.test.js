@@ -28,6 +28,9 @@ test('normalizes the Grafana webhook envelope to bounded alert metadata', () => 
     labels: { alertname: 'PairCodeRoomErrors', service: 'paircode-interview' },
     annotations: { summary: 'Room failures' },
   });
+  assert.throws(() => normalizeWebhook({ alerts: [{
+    status: 'firing', labels: { alertname: 'OtherService' }, annotations: {},
+  }] }), /invalid alert/);
 });
 
 test('dispatches only sanitized alert metadata to GitHub', async () => {

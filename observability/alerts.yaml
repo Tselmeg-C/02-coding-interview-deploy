@@ -2,7 +2,7 @@ groups:
   - name: paircode-interview
     rules:
       - alert: PairCodeRoomErrors
-        expr: sum by (deployment_environment_name, service_version) (rate(paircode_room_events_total{result="error"}[5m])) > 0
+        expr: sum by (deployment_environment_name, service_version, operation, error_type) (rate(paircode_operation_errors_total[5m])) > 0
         for: 10m
         labels:
           service: paircode-interview
