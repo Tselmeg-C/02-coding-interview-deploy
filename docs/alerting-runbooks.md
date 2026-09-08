@@ -6,6 +6,14 @@ Load them into the managed Grafana alerting system and set
 `DASHBOARD_URL` to the saved PairCode dashboard URL. Keep contact points and
 authentication outside the repository.
 
+Route production alerts to the Railway receiver's `/alerts` endpoint. Configure
+HMAC-SHA256 with `X-Grafana-Alerting-Signature`, set the timestamp header to
+`X-Grafana-Alerting-Timestamp`, and use the receiver's
+`GRAFANA_WEBHOOK_SECRET`. Keep resolved notifications enabled so resolved
+alerts close their incident issues. See
+[`on-call-engineer/README.md`](../on-call-engineer/README.md) for the complete
+external configuration.
+
 Every notification must retain the alert name, service, environment, version,
 owner, severity, dashboard URL, user impact, first action, and escalation
 message from the rule annotations. Group by service, environment, alert name,
@@ -45,9 +53,10 @@ development PostgreSQL.
 
 ## Safe verification
 
-In a disposable development environment, temporarily lower one rule's
-threshold or use a synthetic test alert in Grafana. Verify that one grouped
-notification reaches the accountable responder, acknowledgement suppresses
-duplicates, resolution closes the notification, and the alert links to the
-dashboard and this runbook. Restore the original threshold and remove the test
-alert after verification.
+In a disposable development environment, use Grafana's contact-point test and
+then temporarily lower one rule's threshold. Verify that a signed notification
+returns HTTP 202, one GitHub incident opens, a repeated firing notification
+does not rerun the investigation, and a resolved notification closes the
+incident. A safe source fix may open a PR into `dev`; it must still pass normal
+CI and review. Restore the original threshold and remove the test alert after
+verification.

@@ -7,6 +7,7 @@ resource attributes as labels; dashboards filter on environment and version.
 | --- | --- | --- | --- |
 | `paircode_rooms_created` | counter | resource environment/version | One successful room insert |
 | `paircode_room_events` | counter | `operation`, `result`, resource environment/version | One Socket.IO join/update handler |
+| `paircode_operation_errors` | counter | `operation`, `error.type`, resource environment/version | One unhandled HTTP or Socket.IO room operation failure |
 | `paircode_participants_active` | up/down counter | resource environment/version | Successful room join/disconnect |
 | `paircode_room_update_duration` | histogram | `result`, resource environment/version | One update handler, in milliseconds |
 

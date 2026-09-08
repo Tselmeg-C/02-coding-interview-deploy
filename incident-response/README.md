@@ -13,3 +13,8 @@ must produce these redacted, bounded inputs.
 Run `node incident-response/respond.mjs INCIDENT.json` to turn a record into
 structured output. The adapter denies unknown actions and escalates recovery
 actions until `HUMAN_APPROVED=1` is supplied.
+
+The GitHub on-call workflow uses `remediation.schema.json` and
+`remediation.mjs` to constrain model output to a small source-only patch. The
+patch is reapplied and tested in a fresh job with no publishing credential;
+only then may a separate job open a PR into `dev`. It never merges or deploys.
