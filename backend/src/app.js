@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { isRoomUpdate } from './rooms/roomRepository.js';
+import { emitLog } from './telemetry.js';
 
 function errorResponse(error, message) {
   return { error, message };
@@ -49,6 +50,15 @@ export function createApp(store, options = {}) {
 
   api.use((_request, response) => {
     response.status(404).json(errorResponse('not_found', 'The requested endpoint does not exist.'));
+  });
+
+  api.use((error, request, response, next) => {
+    if (response.headersSent) return next(error);
+    emitLog('ERROR', 'HTTP room operation failed', {
+      operation: request.method,
+      'error.type': error instanceof Error ? error.name : 'Error',
+    });
+    response.status(500).json(errorResponse('internal_error', 'The room operation failed. Try again.'));
   });
 
   app.use('/api', api);

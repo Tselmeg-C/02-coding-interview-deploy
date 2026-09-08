@@ -12,6 +12,8 @@
   },
   "include": [
     "backend/src/**/*.js",
+    "on-call-engineer/src/**/*.js",
+    "incident-response/*.mjs",
     "frontend/src/**/*.js",
     "frontend/src/**/*.jsx",
     "frontend/src/**/*.d.ts",

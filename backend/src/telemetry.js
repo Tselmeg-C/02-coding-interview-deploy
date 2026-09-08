@@ -40,6 +40,9 @@ export const roomUpdateDuration = meter.createHistogram('paircode.room.update.du
 
 export function emitLog(severityText, body, attributes = {}) {
   logger.emit({ severityText, body, attributes });
+  if (severityText === 'ERROR') {
+    console.error(JSON.stringify({ ...attributes, severity: severityText, message: body }));
+  }
 }
 
 export function shutdownTelemetry() {
