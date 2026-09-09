@@ -6,13 +6,14 @@ observability service runs inside the application container.
 
 ## Provider setup
 
-Create one Grafana Cloud stack and an access policy with only the OTLP write
-permissions required by the stack. The OpenTelemetry card supplies the
-stack-specific OTLP endpoint and instance ID. Generate the Basic authentication
-value from `instance-id:token` and store the resulting header as a secret.
+Create one Grafana Cloud stack and separate least-privilege OTLP access policies
+for development and production. The OpenTelemetry card supplies the
+stack-specific OTLP endpoint and instance ID. Generate each Basic authentication
+value from `instance-id:token` and store the resulting headers as separate
+Railway secrets.
 
-Configure the same endpoint and separate environment identity in both Railway
-application environments:
+Configure the endpoint, separate credentials, and environment identity in both
+Railway application environments:
 
 ```text
 OTEL_EXPORTER_OTLP_ENDPOINT=https://<stack-otlp-endpoint>
@@ -47,6 +48,18 @@ After setting the Railway variables in each environment:
    log appear with the correct `service.name`, environment, and version.
 4. Confirm telemetry contains no room IDs, participant IDs, source code,
    credentials, connection strings, or raw URLs.
+
+The dashboard is provisioned with `npm run grafana:provision`; the deployment
+smoke check is `npm run grafana:verify`. Both use the Grafana HTTP API and do
+not print tokens.
+
+The repository workflow runs dashboard provisioning after successful `dev` or
+`main` CI and runs the telemetry check after a successful Railway deployment.
+Configure GitHub repository variables `GRAFANA_URL`,
+`GRAFANA_PROMETHEUS_UID`, `GRAFANA_LOKI_UID`, `GRAFANA_TEMPO_UID`,
+`DEVELOPMENT_APP_URL`, and `PRODUCTION_APP_URL`, plus the
+`GRAFANA_DASHBOARD_TOKEN` secret. The token needs dashboard write and read
+access; it is separate from the OTLP ingestion credentials.
 
 Import the version-filterable dashboard from
 [`observability/dashboards/paircode-overview.json`](../observability/dashboards/paircode-overview.json)

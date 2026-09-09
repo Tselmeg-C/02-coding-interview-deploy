@@ -145,10 +145,10 @@ the database client. Automatic instrumentation covers HTTP and PostgreSQL;
 manual spans and bounded counters cover room join/update events. Set
 `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and the three
 `OTEL_*_EXPORTER=otlp` settings in each Railway environment. Set
-`DEPLOYMENT_ENVIRONMENT` to `development` or `production` and
-`SERVICE_VERSION` to the deployed commit or Railway version. The application does
-not emit room IDs, participant IDs, source code, credentials, connection
-strings, or raw URLs to telemetry.
+`DEPLOYMENT_ENVIRONMENT` to `development` or `production`; Railway's
+`RAILWAY_GIT_COMMIT_SHA` supplies the service version automatically. The
+application does not emit room IDs, participant IDs, source code, credentials,
+connection strings, or raw URLs to telemetry.
 
 For local runs, copy `.env.example` to `.env` and fill in the OTLP endpoint and
 header. The backend loads that file automatically, and Docker Compose passes it
@@ -171,6 +171,11 @@ services. Keep production restricted to protected branches and require an
 approving reviewer. Store `DATABASE_URL` and telemetry secrets only in their
 matching Railway environments; no credential values belong in the repository
 or workflow logs.
+
+Provision the version-controlled Grafana dashboard with `npm run
+grafana:provision` and verify a deployment with `npm run grafana:verify`.
+These commands require the Grafana URL, dashboard service-account token,
+Prometheus/Loki/Tempo datasource UIDs, app URL, and environment in the shell.
 
 Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
 rollback, incident evidence, and recovery checklist.

@@ -14,7 +14,9 @@
     "test:backup-restore": "bash scripts/postgres-restore-smoke.sh",
     "security-audit": "node security-audit/run.mjs",
     "test:security-audit": "node --test security-audit/test/*.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "grafana:provision": "node scripts/provision-grafana-dashboard.mjs",
+    "grafana:verify": "node scripts/verify-telemetry.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
