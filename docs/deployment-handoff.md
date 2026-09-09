@@ -5,7 +5,7 @@ record of releases, verification evidence, exceptions, and rollback context.
 
 ## Current state
 
-Updated: September 3, 2026.
+Updated: September 9, 2026.
 
 - Deployment branch: `dev`.
 - Pull requests and pushes run the GitHub quality gates. Railway's GitHub
@@ -16,6 +16,8 @@ Updated: September 3, 2026.
 - A release PR from `dev` to protected `main` is required for production.
   Railway production uses the `main` GitHub source with **Wait for CI** and
   the protected production approval.
+- The observability hardening work is merged into `dev` in PR #71 and is ready
+  for the next reviewed `dev`-to-`main` promotion.
 
 ## Verified work
 
@@ -27,8 +29,11 @@ Updated: September 3, 2026.
   Compose-backed HTTP integration smoke test, and Playwright two-browser room
   synchronization E2E test.
 - The local lint and type-check commands pass with the current configuration.
-- Railway GitHub autodeploy must be enabled for the matching branch in each
-  environment, with **Wait for CI** enabled.
+- Railway GitHub autodeploy is connected to `dev` for development and `main`
+  for production, with **Wait for CI** enabled for both services.
+- Grafana currently has the version-controlled PairCode dashboard with
+  environment and version selectors, HTTP metrics, application error logs,
+  and traces. The live data includes both `development` and `production`.
 
 No secret or token value is stored in this repository or this handoff.
 
@@ -69,15 +74,13 @@ Production changes arrive through the protected `dev`-to-`main` release PR.
 Rollback uses a reviewed revert or a redeploy of the previous successful
 Railway deployment.
 
-## Next-session work
+## Remaining operator actions
 
-The production environment split is in place. After the Railway GitHub-source
-connections and **Wait for CI** settings are verified, future work can
-include:
-
-1. Add observability, alerting, and a documented incident response process.
-2. Consider preview/staging environments before production for larger changes.
-3. Keep the existing CI, health, and two-browser checks required for changes
-   to the application or deployment stack.
-4. Do not print, commit, or request secret values. Use
-   `env -u GITHUB_TOKEN` for GitHub CLI and Git push operations.
+1. Keep separate Grafana OTLP access-policy credentials in the Railway
+   development and production environments; never commit or print them.
+2. Configure the documented Grafana GitHub variables and dashboard token if
+   automatic dashboard provisioning is desired in CI.
+3. Run the managed-PostgreSQL backup/restore exercise quarterly and record its
+   result in the secure operations log.
+4. Promote the verified `dev` state to `main` through the protected release PR
+   when the development observation window is complete.

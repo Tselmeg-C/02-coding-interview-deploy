@@ -14,7 +14,7 @@ Interview, including the review and verification applied to the generated work.
 | API and backend | Defined the OpenAPI contract, Express routes, in-memory store, and Socket.IO room protocol. | Ran endpoint tests and two-client Socket.IO synchronization tests. |
 | Browser execution | Added JavaScript and Python Web Worker runners and Pyodide integration. | Confirmed Python execution in the browser and verified the backend never receives code for execution. |
 | Containerization and deployment | Created the multi-stage Dockerfile, Docker Compose stack, Postgres readiness checks, and same-origin production serving arrangement. | Built the Compose stack, verified container health, and ran the Postgres integration smoke test. |
-| End-to-end testing and CI/CD | Added a Playwright two-session collaboration test and GitHub Actions gates for unit, integration, E2E, deployment, and post-deploy health verification. | Ran the two-browser test locally against Compose. The hosted workflow has passed backend, frontend, Compose, and E2E jobs; its Railway deployment job lacked GitHub configuration values and must be rerun after they are added. |
+| End-to-end testing and CI/CD | Added a Playwright two-session collaboration test and GitHub Actions gates for unit, integration, E2E, deployment, and post-deploy health verification. | Ran the two-browser test locally against Compose. Hosted backend, frontend, lint, typecheck, Compose, E2E, and Railway health checks have passed on the protected release path. |
 | Documentation | Maintained local setup, test, container, deployment, and homework-answer documentation. | Reviewed commands against the project scripts and deployment approach. |
 
 ## Verification commands
@@ -51,7 +51,9 @@ domain passed the two-browser collaboration journey; see
 - Browser Workers isolate code from the application UI and server, but are not
   a substitute for a hardened multi-tenant remote execution sandbox.
 - Production observability, alerting, release environments, and incident
-  response are future operational work.
-- Railway CI configuration and authentication must be verified with a
-  successful deployment and public health check before automatic deployment is
-  considered complete.
+  response are implemented in the versioned runbooks and workflows. Provider
+  credentials, Grafana CI variables, managed backup settings, and recurring
+  restore exercises remain operator-managed follow-up work.
+- Railway CI configuration and authentication are verified with successful
+  protected-branch deployments and public health checks; continue recording
+  each release in `docs/deployment-history.md`.

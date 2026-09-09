@@ -193,7 +193,7 @@ GitHub, and Grafana setup.
 
 ## Project progress
 
-As of September 3, 2026:
+As of September 9, 2026:
 
 - The local production-like Compose stack, backed by Postgres, has passed its
   HTTP integration smoke test and two-browser collaboration E2E test.
@@ -205,3 +205,9 @@ As of September 3, 2026:
   service connected through `DATABASE_URL`.
 - The production deployment passed health, room persistence, and two-browser
   collaboration checks before production automation was enabled.
+- The version-controlled Grafana dashboard shows development and production
+  telemetry with environment/version filters, application error logs, and
+  traces. PR #71 added commit-based service-version fallback plus dashboard
+  provisioning and post-deploy telemetry verification for `dev`.
+- The next production release should promote the verified `dev` state through
+  the protected `dev`-to-`main` pull request.
