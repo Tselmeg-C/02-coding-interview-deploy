@@ -1,0 +1,53 @@
+name: Observability configuration
+
+on:
+  workflow_run:
+    workflows: [CI and environment deployments]
+    types: [completed]
+    branches: [dev, main]
+  deployment_status:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provision-dashboard:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    env:
+      GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+      GRAFANA_PROMETHEUS_UID: ${{ vars.GRAFANA_PROMETHEUS_UID }}
+      GRAFANA_LOKI_UID: ${{ vars.GRAFANA_LOKI_UID }}
+      GRAFANA_TEMPO_UID: ${{ vars.GRAFANA_TEMPO_UID }}
+      GRAFANA_DASHBOARD_TOKEN: ${{ secrets.GRAFANA_DASHBOARD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Provision dashboard
+        if: env.GRAFANA_DASHBOARD_TOKEN != ''
+        run: npm run grafana:provision
+      - name: Skip dashboard provisioning when GitHub configuration is incomplete
+        if: env.GRAFANA_DASHBOARD_TOKEN == ''
+        run: echo 'GRAFANA_DASHBOARD_TOKEN is not configured; dashboard provisioning skipped.'
+
+  verify-telemetry:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    env:
+      APP_URL: ${{ github.event.deployment_status.environment == 'production' && vars.PRODUCTION_APP_URL || vars.DEVELOPMENT_APP_URL }}
+      DEPLOYMENT_ENVIRONMENT: ${{ github.event.deployment_status.environment }}
+      GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+      GRAFANA_PROMETHEUS_UID: ${{ vars.GRAFANA_PROMETHEUS_UID }}
+      GRAFANA_DASHBOARD_TOKEN: ${{ secrets.GRAFANA_DASHBOARD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Verify telemetry
+        if: env.GRAFANA_DASHBOARD_TOKEN != '' && env.APP_URL != ''
+        run: npm run grafana:verify
+      - name: Skip telemetry verification when GitHub configuration is incomplete
+        if: env.GRAFANA_DASHBOARD_TOKEN == '' || env.APP_URL == ''
+        run: echo 'Grafana token or app URL is not configured; telemetry verification skipped.'

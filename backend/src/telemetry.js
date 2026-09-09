@@ -13,8 +13,12 @@ if (process.env.OTEL_EXPORTER_OTLP_HEADERS) {
 
 const resource = resourceFromAttributes({
   'service.name': 'paircode-interview',
-  'deployment.environment.name': process.env.DEPLOYMENT_ENVIRONMENT ?? 'development',
-  'service.version': process.env.SERVICE_VERSION ?? process.env.GITHUB_SHA ?? 'local',
+  'deployment.environment.name': process.env.DEPLOYMENT_ENVIRONMENT
+    ?? (process.env.NODE_ENV === 'production' ? 'production' : 'development'),
+  'service.version': process.env.SERVICE_VERSION
+    ?? process.env.RAILWAY_GIT_COMMIT_SHA
+    ?? process.env.GITHUB_SHA
+    ?? 'local',
 });
 
 const sdk = new NodeSDK({
