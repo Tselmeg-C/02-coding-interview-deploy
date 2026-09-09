@@ -145,10 +145,10 @@ the database client. Automatic instrumentation covers HTTP and PostgreSQL;
 manual spans and bounded counters cover room join/update events. Set
 `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and the three
 `OTEL_*_EXPORTER=otlp` settings in each Railway environment. Set
-`DEPLOYMENT_ENVIRONMENT` to `development` or `production` and
-`SERVICE_VERSION` to the deployed commit or Railway version. The application does
-not emit room IDs, participant IDs, source code, credentials, connection
-strings, or raw URLs to telemetry.
+`DEPLOYMENT_ENVIRONMENT` to `development` or `production`; Railway's
+`RAILWAY_GIT_COMMIT_SHA` supplies the service version automatically. The
+application does not emit room IDs, participant IDs, source code, credentials,
+connection strings, or raw URLs to telemetry.
 
 For local runs, copy `.env.example` to `.env` and fill in the OTLP endpoint and
 header. The backend loads that file automatically, and Docker Compose passes it
@@ -172,6 +172,11 @@ approving reviewer. Store `DATABASE_URL` and telemetry secrets only in their
 matching Railway environments; no credential values belong in the repository
 or workflow logs.
 
+Provision the version-controlled Grafana dashboard with `npm run
+grafana:provision` and verify a deployment with `npm run grafana:verify`.
+These commands require the Grafana URL, dashboard service-account token,
+Prometheus/Loki/Tempo datasource UIDs, app URL, and environment in the shell.
+
 Use [`docs/operations-runbook.md`](docs/operations-runbook.md) for the release,
 rollback, incident evidence, and recovery checklist.
 
@@ -188,7 +193,7 @@ GitHub, and Grafana setup.
 
 ## Project progress
 
-As of September 3, 2026:
+As of September 9, 2026:
 
 - The local production-like Compose stack, backed by Postgres, has passed its
   HTTP integration smoke test and two-browser collaboration E2E test.
@@ -200,3 +205,9 @@ As of September 3, 2026:
   service connected through `DATABASE_URL`.
 - The production deployment passed health, room persistence, and two-browser
   collaboration checks before production automation was enabled.
+- The version-controlled Grafana dashboard shows development and production
+  telemetry with environment/version filters, application error logs, and
+  traces. PR #71 added commit-based service-version fallback plus dashboard
+  provisioning and post-deploy telemetry verification for `dev`.
+- The next production release should promote the verified `dev` state through
+  the protected `dev`-to-`main` pull request.

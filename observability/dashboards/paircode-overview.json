@@ -111,8 +111,8 @@
   "schemaVersion": 39,
   "templating": {
     "list": [
-      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}},
-      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, service_version)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}}
+      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, deployment_environment_name)", "includeAll": true, "multi": true, "refresh": 1, "current": {"text": "All", "value": ["$__all"]}},
+      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, service_version)", "includeAll": true, "multi": true, "refresh": 1, "current": {"text": "All", "value": ["$__all"]}}
     ]
   },
   "title": "PairCode Interview overview",

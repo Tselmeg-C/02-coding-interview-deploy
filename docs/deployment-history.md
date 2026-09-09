@@ -5,6 +5,25 @@ rollback context. It intentionally excludes credentials and Railway identifier
 values. Add a dated entry whenever deployment behavior or environment state
 changes, a release is promoted, or an operational check fails.
 
+## September 9, 2026 — observability hardening
+
+1. PR #69 merged the Grafana dashboard fixes for HTTP traffic, application
+   error logs, traces, and environment/version filtering.
+2. PR #70 promoted the verified `dev` state to `main`; the production CI run
+   `34331647337` passed.
+3. PR #71 merged observability hardening into `dev`, including commit-based
+   service-version fallback, production-safe environment fallback, dashboard
+   provisioning, and post-deploy telemetry verification.
+4. The version-controlled dashboard was provisioned successfully, and live
+   Grafana verification passed for both `development` and `production`.
+5. The development Railway service is connected to `dev` and production to
+   `main`, with Railway **Wait for CI** enabled for both.
+
+The next production promotion must use the protected `dev`-to-`main` release
+PR after the development observation window. OTLP access-policy credentials,
+Grafana CI variables, and managed backup settings remain provider-side
+operator configuration and are not recorded here.
+
 ## September 3, 2026 — production rollout
 
 ### Milestones
@@ -94,17 +113,16 @@ changes, a release is promoted, or an operational check fails.
 
 ### Follow-up signal
 
-- Issue #29 tracks removal of the Node.js 20 action-runtime warning. Official
-  action metadata was verified before changing the workflow:
+- Issue #29 removed the Node.js 20 action-runtime warning. Official action
+  metadata was verified before changing the workflow:
   `actions/checkout@v7.0.1` and `actions/setup-node@v7.0.0` both declare the
   Node.js 24 runtime.
 
 ### Review-feedback remediation
 
-- Issue #32 records two valid P2 findings that were present before their pull
-  requests were merged. Administrator review bypass does not waive review
-  findings; each finding must be fixed, rejected with evidence, or placed in a
-  linked follow-up issue before subsequent backlog work starts.
+- Issue #32 recorded two valid P2 findings that were present before their pull
+  requests were merged. Administrator review bypass did not waive review
+  findings; both were resolved before subsequent backlog work continued.
 - The PR #25 finding identified an unsupported TypeScript brace glob. The
   frontend JavaScript and JSX patterns are now listed separately so the
   required type-check includes components, services, and workers.
