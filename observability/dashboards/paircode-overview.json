@@ -1,4 +1,9 @@
 {
+  "__inputs": [
+    {"name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus", "pluginName": "Prometheus"},
+    {"name": "DS_LOKI", "label": "Loki", "type": "datasource", "pluginId": "loki", "pluginName": "Loki"},
+    {"name": "DS_TEMPO", "label": "Tempo", "type": "datasource", "pluginId": "tempo", "pluginName": "Tempo"}
+  ],
   "annotations": {"list": []},
   "editable": false,
   "panels": [
@@ -37,13 +42,77 @@
       "title": "Room update processing p95",
       "type": "timeseries",
       "targets": [{"expr": "histogram_quantile(0.95, sum by (le, result, deployment_environment_name, service_version) (rate(paircode_room_update_duration_bucket{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m])))", "legendFormat": "{{result}} {{deployment_environment_name}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "id": 5,
+      "title": "HTTP traffic / second",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 6,
+      "title": "HTTP 5xx errors / second",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$environment\",service_version=~\"$version\",http_response_status_code=~\"5..\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "id": 7,
+      "title": "HTTP request p95",
+      "type": "timeseries",
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m])))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "id": 8,
+      "title": "Application operation errors / second",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (operation, deployment_environment_name, service_version) (rate(paircode_operation_errors_total{deployment_environment_name=~\"$environment\",service_version=~\"$version\"}[5m]))", "legendFormat": "{{operation}} {{deployment_environment_name}}"}]
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+      "id": 9,
+      "title": "Health endpoint traffic",
+      "type": "timeseries",
+      "targets": [{"expr": "sum by (deployment_environment_name, service_version) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$environment\",service_version=~\"$version\",http_route=\"/health\"}[5m]))", "legendFormat": "{{deployment_environment_name}} {{service_version}}"}]
+    },
+    {
+      "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 40},
+      "id": 10,
+      "options": {"showCommonLabels": false, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLines": true},
+      "targets": [{"expr": "{service_name=\"paircode-interview\",deployment_environment_name=~\"$environment\",service_version=~\"$version\",detected_level=~\"(?i)error\"}", "refId": "A"}],
+      "title": "Application error logs",
+      "type": "logs"
+    },
+    {
+      "datasource": {"type": "tempo", "uid": "${DS_TEMPO}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 50},
+      "id": 11,
+      "targets": [{"queryType": "traceql", "query": "{ resource.service.name = \"paircode-interview\" && resource.deployment.environment.name =~ \"$environment\" && resource.service.version =~ \"$version\" }", "refId": "A"}],
+      "title": "Application traces",
+      "type": "traces"
     }
   ],
   "schemaVersion": 39,
   "templating": {
     "list": [
-      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values(paircode_room_events_total, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}},
-      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values(paircode_room_events_total, service_version)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}}
+      {"name": "environment", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, deployment_environment_name)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}},
+      {"name": "version", "type": "query", "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "query": "label_values({__name__=~\"paircode_.*|http_server_request_duration_seconds.*\"}, service_version)", "includeAll": true, "multi": true, "current": {"text": "All", "value": ["$__all"]}}
     ]
   },
   "title": "PairCode Interview overview",
