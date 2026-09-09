@@ -1,3 +1,5 @@
+/* global URL, console, fetch, process, setTimeout */
+
 const required = [
   'APP_URL',
   'GRAFANA_URL',
