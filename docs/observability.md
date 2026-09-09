@@ -50,7 +50,9 @@ After setting the Railway variables in each environment:
 
 Import the version-filterable dashboard from
 [`observability/dashboards/paircode-overview.json`](../observability/dashboards/paircode-overview.json)
-and select the Prometheus data source created by Grafana Cloud. Metric names,
+and map its Prometheus, Loki, and Tempo inputs to the matching Grafana Cloud
+data sources. The dashboard includes metrics, ERROR logs, and TraceQL traces;
+use Grafana Explore to inspect the same signals when a panel is empty. Metric names,
 boundaries, and intentionally deferred product metrics are listed in
 [`metrics.md`](metrics.md).
 
